@@ -1,0 +1,167 @@
+{% load static %}
+<html>
+<head>
+    <link rel="stylesheet" href="{% static '/css/sellerreg.css' %}">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+       
+     <title>Register</title>
+</head>
+<body>
+    <nav class="Logo">
+        <div class="container">
+            <img id="logoimg" src="{% static 'images/logoecohive.png' %}">
+        </div>
+    </nav>
+        <div class="signup">
+                <div id="signuptext">
+                    <p id="signuptext1">SIGN UP</p>
+                 
+                    <h2 id="signuptext3">Naturally You</h2>
+                </div>
+                <form class="signup-form" method="POST" action="login.html">
+                    {% csrf_token %}
+                    <input id="name" class="signupelement" placeholder="Username" required name="username"><br>
+                    <span id="nameError" style="font-size: small;" class="element"></span> <br>
+                    <input id="email" class="signupelement" placeholder="Email" required name="email"><br>
+                    <span id="emailError" style="font-size: small;" class="element"></span> <br>
+                    {% comment %} <input id="phone" class="signupelement" placeholder="Phone Number (With country code)" required name="phone"><br>
+                    <span id="phoneError" style="font-size: small;" class="element"></span> <br> {% endcomment %}
+                    <input id="password" class="signupelement" placeholder="Password" type="password" required name="pwd"><br>
+                    <span id="passwordError" style="font-size: small;" class="element"></span> <br>
+                    <input id="cpassword" class="signupelement" placeholder="Confirm Password" type="password" name="cpwd"><br>
+                    <span id="cpasswordError" style="font-size: small;" class="element"></span> <br>
+                    <label for="is_seller">Register as Seller:</label>
+                    <input type="checkbox" name="is_seller" id="is_seller">
+                    {% comment %} <input id="sellerAddress" class="signupelement" placeholder="Seller Address" required name="sellerAddress"><br>
+                    <br> {% endcomment %}
+                    <div class="icon-container">
+                        <a href="#"><span id="icon" class="fab fa-google" style="color: red"></span></a>
+                        <a href="#"><span id="icon" class="fab fa-facebook" style="color: blue"></span></a>
+                        <a href="#"><span id="icon" class="fab fa-twitter" style="color: #1DA1F2"></span></a>
+                    </div>
+                   <button id="submitButton" class="signupbtn" type="submit" disabled formaction="login.html">Register</button>
+                   
+                    <p id="signupelement2">Already have an account? <a href="login.html" style="color: #27350F; text-decoration: none">signin</a></p>
+                </form>
+                <div class="signupimg">
+                    <img id="img1" src="{% static 'images/background1.png' %}">
+                </div>               
+        </div>
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                var emailInput = document.getElementById("email");
+                var emailError = document.getElementById("emailError");
+                var nameInput = document.getElementById("name");
+                var nameError = document.getElementById("nameError");
+                var phoneInput = document.getElementById("phone");
+                var phoneError = document.getElementById("phoneError");
+                var passwordInput = document.getElementById("password");
+                var passwordError = document.getElementById("passwordError");
+                var confirmPasswordInput = document.getElementById("cpassword");
+                var confirmPasswordError = document.getElementById("cpasswordError");
+                var submitButton = document.getElementById("submitButton");
+        
+                emailInput.addEventListener("input", function () {
+                    validateField(emailInput, emailError, validateEmail);
+                    updateSubmitButton();
+                });
+        
+                nameInput.addEventListener("input", function () {
+                    validateField(nameInput, nameError, validateName);
+                    updateSubmitButton();
+                });
+        
+                phoneInput.addEventListener("input", function () {
+                    validateField(phoneInput, phoneError, validatePhoneNumber);
+                    updateSubmitButton();
+                });
+        
+                passwordInput.addEventListener("input", function () {
+                    validateField(passwordInput, passwordError, validatePassword);
+                    updateSubmitButton();
+                });
+        
+                confirmPasswordInput.addEventListener("input", function () {
+                    validateField(confirmPasswordInput, confirmPasswordError, validateConfirmPassword);
+                    updateSubmitButton();
+                });
+        
+                function validateField(input, errorElement, validationFunction) {
+                    var errorMessage = validationFunction(input.value);
+                    errorElement.innerText = errorMessage;
+                }
+        
+                function validateField(input, errorElement, validationFunction) {
+                    var errorMessage = validationFunction(input.value);
+                    errorElement.innerText = errorMessage;
+                }
+    
+                function validateEmail(email) {
+                    var pattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+                    if (!pattern.test(email)) {
+                        return "Invalid email";
+                    }
+                    return "";
+                }
+    
+                function validateName(name) {
+                    var pattern = /^[A-Za-z\s]+$/;
+                    if (!pattern.test(name)) {
+                        return "Invalid name: Please use only letters and spaces.";
+                    }
+                    if (/\d/.test(name)) {
+                        return "Invalid name: Cannot contain numbers.";
+                    }
+                    return "";
+                }
+    
+                function validatePassword(password) {
+                    var pattern = /^(?=.*[0-9])(?=.*[!@#$%^&*])(?=.*[A-Z]).{8,}$/;
+                    if (!pattern.test(password)) {
+                        if (password.length < 8) {
+                            return "At least 8 characters";
+                        }
+                        if (!/[0-9]/.test(password)) {
+                            return "At least 1 number";
+                        }
+                        if (!/[!@#$%^&*]/.test(password)) {
+                            return "At least 1 symbol (!@#$%^&*)";
+                        }
+                        if (!/[A-Z]/.test(password)) {
+                            return "At least 1 capital letter";
+                        }
+                        return "Invalid password";
+                    }
+                    return "";
+                }
+    
+                function validateConfirmPassword(confirmPassword) {
+                    var password = passwordInput.value;
+                    if (confirmPassword !== password) {
+                        return "Passwords do not match";
+                    }
+                    return "";
+                }
+        
+                function validatePhoneNumber(phoneNumber) {
+                    var pattern = /^\+91[6-9]\d{9}$/;
+                    if (!pattern.test(phoneNumber)) {
+                        return "Invalid phone number";
+                    }
+                    return "";
+                }
+                // ... remaining code ...
+        
+                function updateSubmitButton() {
+                    var isValid = !emailError.innerText && !nameError.innerText && !phoneError.innerText && !passwordError.innerText && !confirmPasswordError.innerText;
+                    submitButton.disabled = !isValid;
+                }
+            });
+        </script>
+        
+</body>
+</html>
+

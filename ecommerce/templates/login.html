@@ -1,0 +1,61 @@
+{% load static %}
+{% load socialaccount %}
+
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <title>Login</title>
+    <link rel="stylesheet" href="{% static 'css/login.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+
+
+</head>
+
+<body>
+    <nav class="Logo">
+        <div class="container">
+            <img id="logoimg" src="{% static 'images/logoecohive.png' %}">
+        </div>
+    </nav>
+    
+    <div class="signin">
+        <div id="signintext">
+            <p id="signintext1">Green, Clean, Serene.</p>
+            <h2 id="signintext3">SIGN IN</h2>
+        </div>
+        <form class="signin-form" method="post">
+            {% csrf_token %}
+            <input type="text" class="signinelement" placeholder="User Name" required name="username">
+            <input type="password" class="signinelement" placeholder="password" required name="password">
+            {% comment %} {% if error_message %}
+            <div class="d-flex justify-content-center"><p class="text-danger mt-2 fs-3" style="margin-left: 40px; color:red;">{{error_message}}</p></div>
+            {% endif %} {% endcomment %}
+            {% if messages %}
+            <div class="error-message">
+                <p style="color: red; margin-left:65px">
+                    {% for message in messages %}
+                        {{ message }}
+                    {% endfor %}
+                </p>
+            </div>
+        {% endif %}         
+            <p id="signinelement2"><a href="password_reset" style="color: #27350F; text-decoration: none">Forgot password?</a></p>
+            <div class="icon-container">
+                <a href="{% provider_login_url 'google'%}?next=/"><span id="icon" class="fab fa-google" style="color: red"></span></a> <!-- Google icon placeholder -->
+                <a href="#"><span id="icon" class="fab fa-facebook" style="color: blue"></span></a> <!-- Facebook icon placeholder -->
+                <a href="#"><span id="icon" class="fab fa-twitter" style="color: #1DA1F2"></span></a> <!-- Twitter icon placeholder -->
+            </div>
+            <button class="signinbtn" type="submit">Login</button>
+            
+            <p id="signinelement3">Don't have an account? <a href="register.html" style="color: #27350F; text-decoration: none">Signup</a></p>
+
+           
+        </form>
+        <div class="signinimg">
+            <img id="img1" src="{% static 'images/background.jpeg' %}">
+        </div>
+    </div>
+</body>
+</html>

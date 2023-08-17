@@ -1,0 +1,49 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Seller Dashboard</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    /* Custom CSS styles */
+  </style>
+</head>
+<body>
+  <div class="container mt-4">
+    <ul class="nav nav-tabs">
+      <li class="nav-item">
+        <a class="nav-link active" id="certification-tab" data-bs-toggle="tab" href="#certification">Certification Approval</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" id="add-products-tab" data-bs-toggle="tab" href="#add-products" >Add Products</a>
+      </li>
+    </ul>
+    <div class="tab-content mt-4">
+      <div class="tab-pane fade show active" id="certification">
+        <h2>Certification Approval</h2>
+        <form>
+            <label for="myfile">Select a file:</label>
+            <input type="file" id="myfile" name="myfile"><br><br>
+          <!-- Certification approval form fields -->
+          <button type="submit" class="btn btn-primary">Submit Certification Request</button>
+        </form>
+      </div>
+      <div class="tab-pane fade" id="add-products">
+        <h2>Add Products</h2>
+        <form>
+          <!-- Add products form fields (disabled until certification is approved) -->
+          <button type="submit" class="btn btn-primary" disabled>Add Product</button>
+        </form>
+      </div>
+    </div>
+  </div>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    // JavaScript to enable "Add Products" tab upon certification approval (you need to implement this logic)
+    // Example: $('#add-products-tab').removeAttr('disabled');
+  </script>
+</body>
+</html>

@@ -1,0 +1,167 @@
+{% load static %}
+<html>
+<head>
+    <link rel="stylesheet" href="{% static '/css/register.css' %}">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+       
+     <title>Register</title>
+</head>
+<body>
+    <nav class="Logo">
+        <div class="container">
+            <img id="logoimg" src="{% static 'images/logoecohive.png' %}">
+        </div>
+    </nav>
+        <div class="signup">
+                <div id="signuptext">
+                    <p id="signuptext1">SIGN UP</p>
+                 
+                    <h2 id="signuptext3">Naturally You</h2>
+                </div>
+                <form class="signup-form" method="POST">
+                    {% csrf_token %}
+                    <input id="name" class="signupelement" placeholder="Name" required name="username"><br>
+                    <span id="nameError" style="font-size: small;" class="element"></span><br>
+                    <input id="email" class="signupelement" placeholder="Email" required name="email"><br>
+                    <span id="emailError" style="font-size: small;" class="element"></span><br>
+                    <input id="password" class="signupelement" placeholder="Password" type="password" required name="pwd"><br>
+                    <span id="passwordError" style="font-size: small;" class="element"></span> <br>
+                    <input id="cpassword" class="signupelement" placeholder="Confirm Password" type="password" name="cpwd"><br>
+                    <span id="cpasswordError" style="font-size: small;" class="element"></span> <br>
+                    <div class="icon-container">
+                        <a href="#"><span id="icon" class="fab fa-google" style="color: red"></span></a>
+                        <a href="#"><span id="icon" class="fab fa-facebook" style="color: blue"></span></a>
+                        <a href="#"><span id="icon" class="fab fa-twitter" style="color: #1DA1F2"></span></a>
+                    </div>
+                    <button id="submitButton" class="signupbtn" type="submit" disabled>Register</button>
+                   
+                    <p id="signupelement2">Already have an account? <a href="login.html" style="color: #27350F; text-decoration: none">signin</a></p>
+                </form>
+                <div class="signupimg">
+                    <img id="img1" src="{% static 'images/background1.png' %}">
+                </div>               
+        </div>
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                var emailInput = document.getElementById("email");
+                var emailError = document.getElementById("emailError");
+                var nameInput = document.getElementById("name");
+                var nameError = document.getElementById("nameError");
+                var passwordInput = document.getElementById("password");
+                var passwordError = document.getElementById("passwordError");
+                var confirmPasswordInput = document.getElementById("cpassword");
+                var confirmPasswordError = document.getElementById("cpasswordError");
+                var submitButton = document.getElementById("submitButton");
+    
+                emailInput.addEventListener("input", function () {
+                    validateField(emailInput, emailError, validateEmail);
+                    updateSubmitButton();
+                });
+    
+                nameInput.addEventListener("input", function () {
+                    validateField(nameInput, nameError, validateName);
+                    updateSubmitButton();
+                });
+    
+                passwordInput.addEventListener("input", function () {
+                    validateField(passwordInput, passwordError, validatePassword);
+                    updateSubmitButton();
+                });
+    
+                confirmPasswordInput.addEventListener("input", function () {
+                    validateField(confirmPasswordInput, confirmPasswordError, validateConfirmPassword);
+                    updateSubmitButton();
+                });
+    
+                function validateField(input, errorElement, validationFunction) {
+                    var errorMessage = validationFunction(input.value);
+                    errorElement.innerText = errorMessage;
+                }
+    
+                function validateEmail(email) {
+                    var pattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+                    if (!pattern.test(email)) {
+                        return "Invalid email";
+                    }
+                    return "";
+                }
+    
+                function validateName(name) {
+                    var pattern = /^[A-Za-z\s]+$/;
+                    if (!pattern.test(name)) {
+                        return "Invalid name: Please use only letters and spaces.";
+                    }
+                    if (/\d/.test(name)) {
+                        return "Invalid name: Cannot contain numbers.";
+                    }
+                    return "";
+                }
+    
+                function validatePassword(password) {
+                    var pattern = /^(?=.*[0-9])(?=.*[!@#$%^&*])(?=.*[A-Z]).{8,}$/;
+                    if (!pattern.test(password)) {
+                        if (password.length < 8) {
+                            return "At least 8 characters";
+                        }
+                        if (!/[0-9]/.test(password)) {
+                            return "At least 1 number";
+                        }
+                        if (!/[!@#$%^&*]/.test(password)) {
+                            return "At least 1 symbol (!@#$%^&*)";
+                        }
+                        if (!/[A-Z]/.test(password)) {
+                            return "At least 1 capital letter";
+                        }
+                        return "Invalid password";
+                    }
+                    return "";
+                }
+    
+                function validateConfirmPassword(confirmPassword) {
+                    var password = passwordInput.value;
+                    if (confirmPassword !== password) {
+                        return "Passwords do not match";
+                    }
+                    return "";
+                }
+    
+                function updateSubmitButton() {
+                    var isValid = !emailError.innerText && !nameError.innerText && !passwordError.innerText && !confirmPasswordError.innerText;
+                    submitButton.disabled = !isValid;
+                }
+                $(document).ready(function() {
+                    const emailInput = $('#email');
+                    const usernameInput = $('#name');
+                    const emailError = $('#emailError');
+                    const usernameError = $('#nameError');
+                    
+                    emailInput.on('input', function() {
+                        const enteredEmail = $(this).val();
+                        $.get('/check_email/', { email: enteredEmail }, function(data) {
+                            if (enteredEmail && data.exists) {
+                                emailError.text('Email already taken');
+                            } else {
+                                validateField(emailInput, emailError, validateEmail);
+                            }
+                        });
+                    });
+                    
+                    usernameInput.on('input', function() {
+                        const enteredUsername = $(this).val();
+                        $.get('/check_username/', { username: enteredUsername }, function(data) {
+                            if (enteredUsername && data.exists) {
+                                usernameError.text('Username already taken');
+                            } else {
+                                validateField(nameInput, nameError, validateName);
+                            }
+                        });
+                    });
+                });
+            });
+        </script>
+</body>
+</html>
+
