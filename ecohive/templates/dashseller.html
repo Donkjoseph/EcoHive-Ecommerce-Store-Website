@@ -132,7 +132,7 @@
 
             // Validation for Phone Number
             const phoneNumberValue = phoneNumberInput.value.trim();
-            if (!/^\d{10}$/.test(phoneNumberValue)) {
+            if (!/^(\+91-|0)?[6-9]\d{9}$/.test(phoneNumberValue)) {
                 document.getElementById('phone-number-error').textContent = 'Invalid phone number (10 digits required).';
                 valid = false;
             } else {
@@ -193,7 +193,7 @@
 
         phoneNumberInput.addEventListener('keyup', function () {
             const phoneNumberValue = phoneNumberInput.value.trim();
-            if (!/^\d{10}$/.test(phoneNumberValue)) {
+            if (!/^(\+91-|0)?[6-9]\d{9}$/.test(phoneNumberValue)) {
                 document.getElementById('phone-number-error').textContent = 'Invalid phone number (10 digits required).';
             } else {
                 document.getElementById('phone-number-error').textContent = '';
