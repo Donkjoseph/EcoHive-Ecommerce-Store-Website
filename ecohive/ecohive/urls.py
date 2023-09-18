@@ -85,9 +85,10 @@ urlpatterns = [
 
     #customerpages
     path('wishlist', views.wishlist, name='wishlist'),
-    path('product_single', views.product_single, name='product_single'),
+    path('product/<int:product_id>/', views.product_single, name='product_single'),
     path('checkout', views.checkout, name='checkout'),
-    path('cart', views.cart, name='cart'),
+    path('cart/', views.cart_view, name='cart'),
+    path('remove_from_cart/<int:cart_item_id>/', views.remove_from_cart, name='remove_from_cart'),
     path('about', views.about, name='about'),
     path('shop', views.shop, name='shop'),
     path('category/vegetables/', views.category_vegetables, name='category_vegetables'),

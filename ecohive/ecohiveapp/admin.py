@@ -58,3 +58,12 @@ class UserProfileAdmin(admin.ModelAdmin):
             'fields': ('profile_pic', 'address'),
         }),
     )
+
+from .models import Cart
+
+class CartAdmin(admin.ModelAdmin):
+    list_display = ('user', 'product', 'quantity', 'date_added')
+    list_filter = ('user', 'date_added')
+    search_fields = ('user__username', 'product__product_name')
+
+admin.site.register(Cart, CartAdmin)

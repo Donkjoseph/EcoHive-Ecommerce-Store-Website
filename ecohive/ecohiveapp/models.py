@@ -153,3 +153,19 @@ class ProductSummary(models.Model):
         product_summary, created = ProductSummary.objects.get_or_create(product_name=product_name)
         product_summary.total_stock = total_stock or 0
         product_summary.save()
+    
+class Cart(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    quantity = models.PositiveIntegerField(default=1)
+    date_added = models.DateTimeField(auto_now_add=True)
+    price = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    image = models.ImageField(upload_to='cart_item_images/', blank=True, null=True)  # Add image field
+
+    def __str__(self):
+        return f"{self.user.username}'s Cart Item - {self.product.product_name}"
+
+    def save(self, *args, **kwargs):
+        # Calculate the price based on the product's price per kg and the quantity
+        self.price = self.product.product_price * self.quantity
+        super().save(*args, **kwargs)

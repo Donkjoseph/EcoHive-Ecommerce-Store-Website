@@ -6,6 +6,13 @@
     <div class="card-body">
         <h5 class="fw-semibold">Edit Category Details</h5>
         <!-- edit_category.html -->
+        {% if messages %}
+        <ul class="messages">
+            {% for message in messages %}
+                <li {% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+            {% endfor %}
+        </ul>
+            {% endif %}
         <form method="post" onsubmit="return validateForm()">
             {% csrf_token %}
             <div class="form-group">
@@ -41,7 +48,7 @@
         if (category_nameValue === '') {
             category_nameError.textContent = 'Category Name cannot be empty.';
             isValid = false;
-        } else if (!/^[A-Za-z]+$/.test(category_nameValue)) {
+        } else if (!/^[A-Za-z\s]+$/.test(category_nameValue)) {
             category_nameError.textContent = 'Category Name should contain only alphabetic characters.';
             isValid = false;
         } else {
@@ -49,8 +56,8 @@
         }
 
         // Validate Category Description
-        if (!/^[A-Za-z\s]*$/.test(category_descriptionValue)) {
-            category_descriptionError.textContent = 'Category Description should contain only alphabetic characters and spaces.';
+        if (category_descriptionValue.trim() === '') {
+            category_descriptionError.textContent = 'Category Description cannot be empty.';
             isValid = false;
         } else {
             category_descriptionError.textContent = '';

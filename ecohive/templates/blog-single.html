@@ -51,34 +51,83 @@
 		  </div>
     </div>
     <nav class="navbar navbar-expand-lg navbar-dark ftco_navbar bg-dark ftco-navbar-light" id="ftco-navbar">
-	    <div class="container">
-	      <a class="navbar-brand" href="index.html">Vegefoods</a>
-	      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#ftco-nav" aria-controls="ftco-nav" aria-expanded="false" aria-label="Toggle navigation">
-	        <span class="oi oi-menu"></span> Menu
-	      </button>
-
-	      <div class="collapse navbar-collapse" id="ftco-nav">
-	        <ul class="navbar-nav ml-auto">
-	          <li class="nav-item"><a href="index.html" class="nav-link">Home</a></li>
-	          <li class="nav-item dropdown">
-              <a class="nav-link dropdown-toggle" href="#" id="dropdown04" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Shop</a>
-              <div class="dropdown-menu" aria-labelledby="dropdown04">
-              	<a class="dropdown-item" href="shop.html">Shop</a>
-              	<a class="dropdown-item" href="wishlist.html">Wishlist</a>
-                <a class="dropdown-item" href="product-single.html">Single Product</a>
-                <a class="dropdown-item" href="cart.html">Cart</a>
-                <a class="dropdown-item" href="checkout.html">Checkout</a>
-              </div>
-            </li>
-	          <li class="nav-item"><a href="about.html" class="nav-link">About</a></li>
-	          <li class="nav-item active"><a href="blog.html" class="nav-link">Blog</a></li>
-	          <li class="nav-item"><a href="contact.html" class="nav-link">Contact</a></li>
-	          <li class="nav-item cta cta-colored"><a href="cart.html" class="nav-link"><span class="icon-shopping_cart"></span>[0]</a></li>
-
-	        </ul>
-	      </div>
-	    </div>
-	  </nav>
+      <div class="container">
+        <a class="navbar-brand" href="{% url 'index' %}">Eco Hive</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#ftco-nav" aria-controls="ftco-nav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="oi oi-menu"></span> Menu
+        </button>
+      
+        <div class="collapse navbar-collapse" id="ftco-nav">
+        <ul class="navbar-nav ml-auto">
+          {% if user.is_authenticated %}
+          {% if user.is_superuser %}
+          <li class="nav-item"> <a class="nav-link" href="{% url 'admindash' %}">Admin Dashboard</a></li>
+          {% elif user.is_seller %}
+          <li class="nav-item"><a class="nav-link" href="{% url 'dashseller' %}">Seller Dashboard</a></li>
+          {% endif %}
+          {% endif %}
+          <li class="nav-item active"><a href="{% url 'index' %}" class="nav-link">Home</a></li>
+          <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="{% url 'shop' %}" id="dropdown04" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Shop</a>
+          <div class="dropdown-menu" aria-labelledby="dropdown04">
+            <a class="dropdown-item" href="{% url 'shop' %}">Shop</a>
+            <a class="dropdown-item" href="{% url 'wishlist' %}">Wishlist</a>
+            <a class="dropdown-item" href="{% url 'cart' %}">Cart</a>
+            <a class="dropdown-item" href="{% url 'checkout' %}">Checkout</a>
+          </div>
+          </li>
+          <li class="nav-item"><a href="{% url 'about' %}" class="nav-link">About</a></li>
+          <li class="nav-item"><a href="#" class="nav-link">Blog</a></li>
+          <li class="nav-item"><a href="#" class="nav-link">Contact</a></li>
+          <li class="nav-item cta cta-colored"><a href="cart.html" class="nav-link"><span class="icon-shopping_cart"></span>[0]</a></li>
+      
+          <!-- Added Login and Registration buttons -->
+          {% if user.is_authenticated %}
+    <div class="navbar-collapse justify-content-end px-0" id="navbarNav">
+              <ul class="navbar-nav flex-row ms-auto align-items-center justify-content-end">
+                <p class="me-3">Welcome, {{ user.username }}</p>
+                <li class="nav-item dropdown">
+                  <a class="nav-link nav-icon-hover" href="javascript:void(0)" id="drop2" data-bs-toggle="dropdown" aria-expanded="false">
+            {% if user.userprofile.profile_pic %}
+              <img src="{{ user.userprofile.profile_pic.url }}" alt="" width="35" height="35" class="rounded-circle">
+            {% else %}
+              <img src="{% static 'admin/assets/images/profile/user-1.jpg' %}" alt="" width="35" height="35" class="rounded-circle">
+            {% endif %}
+            </a> 
+                  <div class="dropdown-menu dropdown-menu-end dropdown-menu-animate-up" aria-labelledby="drop2">
+                    <div class="message-body">
+                      <a href="{% url 'profile' %}" class="d-flex align-items-center gap-2 dropdown-item">
+                          <i class="ti ti-user fs-6"></i>
+                          <p class="mb-0 fs-3">My Profile</p>
+                        </a>
+                      <a href="javascript:void(0)" class="d-flex align-items-center gap-2 dropdown-item">
+                        <i class="ti ti-mail fs-6"></i>
+                        <p class="mb-0 fs-3">My Account</p>
+                      </a>
+                      <a href="{% url 'loggout' %}" class="nav-link mx-3 mt-2 d-block" style="color:black;">Logout</a>
+                    </div>
+                  </div>
+                </li>
+              </ul>
+            </div>
+          {% else %}
+          <a href="{% url 'login' %}" class="nav-link" style="color:black; margin-top:13px;">Login</a>
+          <a href="{% url 'register' %}" class="nav-link" style="color:black;  margin-top:13px;">Register</a>
+         {% comment %} </li>
+        <li class="nav-item dropdown">
+          <a href="#" class="nav-link dropdown-toggle" id="registerDropdown" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            Register
+          </a>
+          <div class="dropdown-menu" aria-labelledby="registerDropdown"> {% endcomment %}
+            
+            {% comment %} <a class="dropdown-item" href="{% url 'customer_register' %}">Register as Customer</a> {% endcomment %}
+          {% comment %} </div> {% endcomment %}
+        {% endif %}
+        {% comment %} </li> {% endcomment %}
+        </ul>
+        </div>
+      </div>
+      </nav>
     <!-- END nav -->
 
     <div class="hero-wrap hero-bread" style="background-image: url('images/bg_1.jpg');">

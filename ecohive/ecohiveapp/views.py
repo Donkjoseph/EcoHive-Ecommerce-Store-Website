@@ -23,8 +23,7 @@ from allauth.socialaccount.providers.oauth2.views import OAuth2LoginView
 from allauth.account.views import SignupView
 from allauth.socialaccount.providers.oauth2.client import OAuth2Error
 from allauth.socialaccount.providers.oauth2.views import OAuth2LoginView
-from allauth.account.views import SignupView
-
+from .models import Cart
 
 
 # from .forms import CustomUserCreationForm
@@ -350,13 +349,21 @@ def delete_category(request, category_id):
     return render(request, 'admindash/delete_category.html', {'category': category, 'associated_products': associated_products})
 
 def edit_category(request, category_id):
-    category = Category.objects.get(id=category_id)
+    category = get_object_or_404(Category, id=category_id)
 
     if request.method == 'POST':
-        category.category_name = request.POST['category_name']
-        category.category_description = request.POST['category_description']
-        category.save()
-        return redirect('viewcategory')  # Replace 'category_list' with your category list URL name
+        new_category_name = request.POST['category_name']
+        
+        # Check if a category with the same name already exists
+        if Category.objects.filter(category_name=new_category_name).exclude(id=category.id).exists():
+            messages.error(request, 'Category with this name already exists.')
+        else:
+            # Update the category if no duplicate name found
+            category.category_name = new_category_name
+            category.category_description = request.POST['category_description']
+            category.save()
+            messages.success(request, 'Category updated successfully.')
+            return redirect('viewcategory')  # Replace 'category_list' with your category list URL name
 
     return render(request, 'admindash/edit_category.html', {'category': category})
 
@@ -533,29 +540,33 @@ def edit_product_stock(request, pk):
 
 def edit_product(request, product_id):
     product = get_object_or_404(Product, id=product_id)
-    categories = Category.objects.all()  # Assuming you have a 'Category' model
+    categories = Category.objects.all()
 
     if request.method == 'POST':
-        # Update the product fields based on form input
-        product.product_name = request.POST['product_name']
-        product.product_description = request.POST['product_description']
-        
-        # Get the category instance based on the selected ID
-        category_id = request.POST.get('select_category')
-        if category_id:
-            category = get_object_or_404(Category, id=category_id)
-            product.category = category
-        
-        product.product_price = request.POST['product_price']
-        product.product_stock = request.POST['product_stock']
-        
-        # Handle product image upload or update
-        if 'product_image' in request.FILES:
-            product.product_image = request.FILES['product_image']
+        new_product_name = request.POST['product_name']
 
-        # Save the updated product
-        product.save()
-        return redirect('viewaddproduct')  # Redirect to the product list page
+        # Check if a product with the same name already exists (excluding the current product)
+        if Product.objects.filter(product_name=new_product_name).exclude(id=product.id).exists():
+            messages.error(request, 'A product with this name already exists.')
+        else:
+            # Update the product fields based on form input
+            product.product_name = new_product_name
+            product.product_description = request.POST['product_description']
+
+            category_id = request.POST.get('select_category')
+            if category_id:
+                category = get_object_or_404(Category, id=category_id)
+                product.category = category
+
+            product.product_price = request.POST['product_price']
+            product.product_stock = request.POST['product_stock']
+
+            if 'product_image' in request.FILES:
+                product.product_image = request.FILES['product_image']
+
+            product.save()
+            messages.success(request, 'Product updated successfully.')
+            return redirect('viewaddproduct')
 
     return render(request, 'sellerdash/edit_product.html', {'product': product, 'categories': categories})
 
@@ -573,17 +584,61 @@ def wishlist(request):
     # Add your logic here
     return render(request, 'wishlist.html')
 
-def product_single(request):
-    # Add your logic here
-    return render(request, 'product-single.html')
+
+@login_required
+def product_single(request, product_id):
+    product = get_object_or_404(Product, pk=product_id)
+    user = request.user
+
+    # Check if the product is already in the user's cart
+    existing_cart_item = Cart.objects.filter(user=user, product=product).first()
+    is_in_cart = existing_cart_item is not None
+
+    if request.method == 'POST':
+        # If it's a POST request, get the quantity from the form
+        quantity = int(request.POST.get('quantity', 1))  # Default to 1 if not provided
+        image = product.product_image
+
+        if not is_in_cart:
+            # If the product is not in the cart, add it to the cart with the specified quantity
+            Cart.objects.create(user=user, product=product, quantity=quantity, image=image)
+        else:
+            # If the product is already in the cart, update the quantity
+            existing_cart_item.quantity += quantity
+            existing_cart_item.save()
+
+        return redirect('cart')  # Redirect to the cart page or any other page you prefer
+
+    return render(request, 'product-single.html', {'product': product, 'is_in_cart': is_in_cart})
 
 def checkout(request):
     # Add your logic here
     return render(request, 'checkout.html')
 
-def cart(request):
-    # Add your logic here
-    return render(request, 'cart.html')
+def cart_view(request):
+    # Assuming you have user authentication and each user has a unique cart
+    user = request.user
+
+    # Retrieve the user's cart items
+    cart_items = Cart.objects.filter(user=user)
+
+    # Calculate the total price of items in the cart
+    total_price = sum(cart_item.product.product_price * cart_item.quantity for cart_item in cart_items)
+
+    context = {
+        'cart_items': cart_items,
+        'total_price': total_price,
+    }
+
+    return render(request, 'cart.html', context)
+
+def remove_from_cart(request, cart_item_id):
+    cart_item = get_object_or_404(Cart, id=cart_item_id)
+
+    if request.method == 'POST':
+        cart_item.delete()
+
+    return redirect('cart')  
 
 def about(request):
     # Add your logic here

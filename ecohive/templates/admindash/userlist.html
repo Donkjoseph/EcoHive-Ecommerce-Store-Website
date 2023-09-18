@@ -107,7 +107,7 @@
           </div>
           <div class="form-group">
             <label for="role">Role:</label>
-            <select id="role" name="role" class="form-control">
+            <select id="role" name="role" class="form-control" required>
                 <option value="customer" {% if user.is_customer %}selected{% endif %}>Customer</option>
                 <option value="seller" {% if user.is_seller %}selected{% endif %}>Seller</option>
                 <option value="admin" {% if user.is_admin %}selected{% endif %}>Admin</option>

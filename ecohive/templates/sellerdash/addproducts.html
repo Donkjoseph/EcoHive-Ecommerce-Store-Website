@@ -104,9 +104,11 @@
             const productStockInput = document.getElementById('product_stock');
             const productStockError = document.getElementById('product_stock_error');
             const productStockValue = productStockInput.value.trim();
-    
+            
             if (isNaN(productStockValue)) {
                 productStockError.textContent = 'Stock (in KG) should be a numeric value.';
+            } else if (parseFloat(productStockValue) < 1) {
+                productStockError.textContent = 'Stock must be atleast 1 KG';
             } else {
                 productStockError.textContent = '';
             }

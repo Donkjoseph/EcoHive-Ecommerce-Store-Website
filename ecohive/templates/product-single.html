@@ -28,6 +28,42 @@
     <link rel="stylesheet" href="{% static 'css/flaticon.css' %}">
     <link rel="stylesheet" href="{% static 'css/icomoon.css' %}">
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
+	<style>
+		.product-image-container {
+			width: 100%; /* Set a fixed width for the container */
+			max-height: 300px; /* Set a maximum height for the images */
+			overflow: hidden; /* Hide any overflow if the image is larger than the container */
+			position: relative; /* Enable absolute positioning for the overlay */
+		}
+		
+		.product-image {
+			width: 100%; /* Ensure the image occupies the full width of its container */
+			height: auto; /* Maintain the aspect ratio of the image */
+			display: block; /* Remove any extra spacing below the image */
+		}
+		
+		/* Example: Add a hover effect */
+		.product-image:hover {
+			transform: scale(1.05); /* Scale the image slightly on hover */
+			transition: transform 0.3s ease; /* Add a smooth transition effect */
+		}
+		/* Style the "Add to Cart" button */
+.add-to-cart-button {
+    background-color: black; /* Button background color */
+    color: black; /* Button text color */
+    border: none; /* Remove button border */
+    border-radius: 5px; /* Add rounded corners */
+    padding: 10px 20px; /* Adjust button padding */
+    font-size: 16px; /* Button text size */
+    cursor: pointer; /* Add pointer cursor on hover */
+}
+
+/* Style the "Add to Cart" button on hover */
+.add-to-cart-button:hover {
+    background-color: black; /* Button background color on hover */
+    color: black; /* Button text color on hover */
+}
+	</style>
   </head>
   <body class="goto-here">
 		<div class="py-1 bg-primary">
@@ -51,38 +87,87 @@
 		    </div>
 		  </div>
     </div>
-    <nav class="navbar navbar-expand-lg navbar-dark ftco_navbar bg-dark ftco-navbar-light" id="ftco-navbar">
-	    <div class="container">
-	      <a class="navbar-brand" href="index.html">Vegefoods</a>
-	      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#ftco-nav" aria-controls="ftco-nav" aria-expanded="false" aria-label="Toggle navigation">
-	        <span class="oi oi-menu"></span> Menu
-	      </button>
-
-	      <div class="collapse navbar-collapse" id="ftco-nav">
-	        <ul class="navbar-nav ml-auto">
-	          <li class="nav-item"><a href="index.html" class="nav-link">Home</a></li>
-	          <li class="nav-item active dropdown">
-              <a class="nav-link dropdown-toggle" href="#" id="dropdown04" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Shop</a>
-              <div class="dropdown-menu" aria-labelledby="dropdown04">
-              	<a class="dropdown-item" href="shop.html">Shop</a>
-              	<a class="dropdown-item" href="wishlist.html">Wishlist</a>
-                <a class="dropdown-item" href="product-single.html">Single Product</a>
-                <a class="dropdown-item" href="cart.html">Cart</a>
-                <a class="dropdown-item" href="checkout.html">Checkout</a>
-              </div>
-            </li>
-	          <li class="nav-item"><a href="about.html" class="nav-link">About</a></li>
-	          <li class="nav-item"><a href="blog.html" class="nav-link">Blog</a></li>
-	          <li class="nav-item"><a href="contact.html" class="nav-link">Contact</a></li>
-	          <li class="nav-item cta cta-colored"><a href="cart.html" class="nav-link"><span class="icon-shopping_cart"></span>[0]</a></li>
-
-	        </ul>
-	      </div>
-	    </div>
+	<nav class="navbar navbar-expand-lg navbar-dark ftco_navbar bg-dark ftco-navbar-light" id="ftco-navbar">
+		<div class="container">
+		  <a class="navbar-brand" href="{% url 'index' %}">Eco Hive</a>
+		  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#ftco-nav" aria-controls="ftco-nav" aria-expanded="false" aria-label="Toggle navigation">
+			<span class="oi oi-menu"></span> Menu
+		  </button>
+	  
+		  <div class="collapse navbar-collapse" id="ftco-nav">
+			<ul class="navbar-nav ml-auto">
+				{% if user.is_authenticated %}
+				{% if user.is_superuser %}
+				<li class="nav-item"> <a class="nav-link" href="{% url 'admindash' %}">Admin Dashboard</a></li>
+				{% elif user.is_seller %}
+				<li class="nav-item"><a class="nav-link" href="{% url 'dashseller' %}">Seller Dashboard</a></li>
+				{% endif %}
+				{% endif %}
+			  <li class="nav-item active"><a href="{% url 'index' %}" class="nav-link">Home</a></li>
+			  <li class="nav-item dropdown">
+				<a class="nav-link dropdown-toggle" href="{% url 'shop' %}" id="dropdown04" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Shop</a>
+				<div class="dropdown-menu" aria-labelledby="dropdown04">
+				  <a class="dropdown-item" href="{% url 'shop' %}">Shop</a>
+				  <a class="dropdown-item" href="{% url 'wishlist' %}">Wishlist</a>
+				  <a class="dropdown-item" href="{% url 'cart' %}">Cart</a>
+				  <a class="dropdown-item" href="{% url 'checkout' %}">Checkout</a>
+				</div>
+			  </li>
+			  <li class="nav-item"><a href="{% url 'about' %}" class="nav-link">About</a></li>
+			  <li class="nav-item"><a href="#" class="nav-link">Blog</a></li>
+			  <li class="nav-item"><a href="#" class="nav-link">Contact</a></li>
+			  <li class="nav-item cta cta-colored"><a href="cart.html" class="nav-link"><span class="icon-shopping_cart"></span>[0]</a></li>
+	  
+			  <!-- Added Login and Registration buttons -->
+			  {% if user.is_authenticated %}
+	<div class="navbar-collapse justify-content-end px-0" id="navbarNav">
+            <ul class="navbar-nav flex-row ms-auto align-items-center justify-content-end">
+              <p class="me-3">Welcome, {{ user.username }}</p>
+              <li class="nav-item dropdown">
+                <a class="nav-link nav-icon-hover" href="javascript:void(0)" id="drop2" data-bs-toggle="dropdown" aria-expanded="false">
+					{% if user.userprofile.profile_pic %}
+					  <img src="{{ user.userprofile.profile_pic.url }}" alt="" width="35" height="35" class="rounded-circle">
+					{% else %}
+					  <img src="{% static 'admin/assets/images/profile/user-1.jpg' %}" alt="" width="35" height="35" class="rounded-circle">
+					{% endif %}
+				  </a> 
+                <div class="dropdown-menu dropdown-menu-end dropdown-menu-animate-up" aria-labelledby="drop2">
+                  <div class="message-body">
+                    <a href="{% url 'profile' %}" class="d-flex align-items-center gap-2 dropdown-item">
+                        <i class="ti ti-user fs-6"></i>
+                        <p class="mb-0 fs-3">My Profile</p>
+                      </a>
+                    <a href="javascript:void(0)" class="d-flex align-items-center gap-2 dropdown-item">
+                      <i class="ti ti-mail fs-6"></i>
+                      <p class="mb-0 fs-3">My Account</p>
+                    </a>
+                    <a href="{% url 'loggout' %}" class="nav-link mx-3 mt-2 d-block" style="color:black;">Logout</a>
+                  </div>
+                </div>
+              </li>
+            </ul>
+          </div>
+				{% else %}
+				<a href="{% url 'login' %}" class="nav-link" style="color:black; margin-top:13px;">Login</a>
+				<a href="{% url 'register' %}" class="nav-link" style="color:black;  margin-top:13px;">Register</a>
+			 {% comment %} </li>
+			<li class="nav-item dropdown">
+				<a href="#" class="nav-link dropdown-toggle" id="registerDropdown" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+					Register
+				</a>
+				<div class="dropdown-menu" aria-labelledby="registerDropdown"> {% endcomment %}
+					
+					{% comment %} <a class="dropdown-item" href="{% url 'customer_register' %}">Register as Customer</a> {% endcomment %}
+				{% comment %} </div> {% endcomment %}
+    	{% endif %}
+			{% comment %} </li> {% endcomment %}
+			</ul>
+		  </div>
+		</div>
 	  </nav>
     <!-- END nav -->
 
-    <div class="hero-wrap hero-bread" style="background-image: url('images/bg_1.jpg');">
+    <div class="hero-wrap hero-bread" style="background-image: url({% static 'images/bg_1.jpg' %});">
       <div class="container">
         <div class="row no-gutters slider-text align-items-center justify-content-center">
           <div class="col-md-9 ftco-animate text-center">
@@ -93,73 +178,49 @@
       </div>
     </div>
 
-    <section class="ftco-section">
-    	<div class="container">
-    		<div class="row">
-    			<div class="col-lg-6 mb-5 ftco-animate">
-    				<a href="images/product-1.jpg" class="image-popup"><img src="images/product-1.jpg" class="img-fluid" alt="Colorlib Template"></a>
-    			</div>
-    			<div class="col-lg-6 product-details pl-md-5 ftco-animate">
-    				<h3>Bell Pepper</h3>
-    				<div class="rating d-flex">
-							<p class="text-left mr-4">
-								<a href="#" class="mr-2">5.0</a>
-								<a href="#"><span class="ion-ios-star-outline"></span></a>
-								<a href="#"><span class="ion-ios-star-outline"></span></a>
-								<a href="#"><span class="ion-ios-star-outline"></span></a>
-								<a href="#"><span class="ion-ios-star-outline"></span></a>
-								<a href="#"><span class="ion-ios-star-outline"></span></a>
-							</p>
-							<p class="text-left mr-4">
-								<a href="#" class="mr-2" style="color: #000;">100 <span style="color: #bbb;">Rating</span></a>
-							</p>
-							<p class="text-left">
-								<a href="#" class="mr-2" style="color: #000;">500 <span style="color: #bbb;">Sold</span></a>
-							</p>
+	<section class="ftco-section">
+		<div class="container">
+			<div class="row">
+				<div class="col-lg-6 mb-5 ftco-animate">
+					<img src="{{ product.product_image.url }}" class="img-fluid" alt="{{ product.product_name }}">
+				</div>
+				<div class="col-lg-6 product-details pl-md-5 ftco-animate">
+					<h3>{{ product.product_name }}</h3>
+					<!-- Display other product details like price, description, etc. -->
+					<p class="price"><span>RS. {{ product.product_price }}</span></p>
+					<p>{{ product.product_description }}</p>
+	
+					<!-- Display the seller's information -->
+					<p>Seller: {{ product.seller }}</p>
+					<h5>Total Stock: {{ product.product_stock }} KG left</h5>
+					<!-- Add to cart button or other actions as needed -->
+					<form method="post">
+						{% csrf_token %}
+						<div class="input-group col-md-6 d-flex mb-3">
+							<span class="input-group-btn mr-2">
+								<button type="button" class="quantity-left-minus btn" data-type="minus" data-field="">
+									<i class="ion-ios-remove"></i>
+								</button>
+							</span>
+							<input type="text" id="quantity" name="quantity" class="form-control input-number" value="1" min="1" max="100">
+							<span class="input-group-btn ml-2">
+								<button type="submit" class="quantity-right-plus btn" data-type="plus" data-field="">
+									<i class="ion-ios-add"></i>
+								</button>
+							</span>
 						</div>
-    				<p class="price"><span>$120.00</span></p>
-    				<p>A small river named Duden flows by their place and supplies it with the necessary regelialia. It is a paradisematic country, in which roasted parts of sentences fly into your mouth. Text should turn around and return to its own, safe country. But nothing the copy said could convince her and so it didn’t take long until.
-						</p>
-						<div class="row mt-4">
-							<div class="col-md-6">
-								<div class="form-group d-flex">
-		              <div class="select-wrap">
-	                  <div class="icon"><span class="ion-ios-arrow-down"></span></div>
-	                  <select name="" id="" class="form-control">
-	                  	<option value="">Small</option>
-	                    <option value="">Medium</option>
-	                    <option value="">Large</option>
-	                    <option value="">Extra Large</option>
-	                  </select>
-	                </div>
-		            </div>
-							</div>
-							<div class="w-100"></div>
-							<div class="input-group col-md-6 d-flex mb-3">
-	             	<span class="input-group-btn mr-2">
-	                	<button type="button" class="quantity-left-minus btn"  data-type="minus" data-field="">
-	                   <i class="ion-ios-remove"></i>
-	                	</button>
-	            		</span>
-	             	<input type="text" id="quantity" name="quantity" class="form-control input-number" value="1" min="1" max="100">
-	             	<span class="input-group-btn ml-2">
-	                	<button type="button" class="quantity-right-plus btn" data-type="plus" data-field="">
-	                     <i class="ion-ios-add"></i>
-	                 </button>
-	             	</span>
-	          	</div>
-	          	<div class="w-100"></div>
-	          	<div class="col-md-12">
-	          		<p style="color: #000;">600 kg available</p>
-	          	</div>
-          	</div>
-          	<p><a href="cart.html" class="btn btn-black py-3 px-5">Add to Cart</a></p>
-    			</div>
-    		</div>
-    	</div>
-    </section>
-
-    <section class="ftco-section">
+						{% if is_in_cart %}
+						<p>Product is already in your cart ({{ cart_quantity }} in cart).</p>
+						{% else %}
+						<button type="submit" class="add-to-cart-button">Add to Cart</button>
+						{% endif %}
+					</form>
+				</div>
+			</div>
+		</div>
+	</section>
+	
+    {% comment %} <section class="ftco-section">
     	<div class="container">
 				<div class="row justify-content-center mb-3 pb-3">
           <div class="col-md-12 heading-section text-center ftco-animate">
@@ -286,7 +347,7 @@
     			</div>
     		</div>
     	</div>
-    </section>
+    </section> {% endcomment %}
 
 		<section class="ftco-section ftco-no-pt ftco-no-pb py-5 bg-light">
       <div class="container py-4">
@@ -358,23 +419,19 @@
           <div class="col-md">
             <div class="ftco-footer-widget mb-4">
             	<h2 class="ftco-heading-2">Have a Questions?</h2>
-            	<div class="block-23 mb-3">
+            	{% comment %} <div class="block-23 mb-3">
 	              <ul>
 	                <li><span class="icon icon-map-marker"></span><span class="text">203 Fake St. Mountain View, San Francisco, California, USA</span></li>
 	                <li><a href="#"><span class="icon icon-phone"></span><span class="text">+2 392 3929 210</span></a></li>
 	                <li><a href="#"><span class="icon icon-envelope"></span><span class="text">info@yourdomain.com</span></a></li>
 	              </ul>
-	            </div>
+	            </div> {% endcomment %}
             </div>
           </div>
         </div>
         <div class="row">
           <div class="col-md-12 text-center">
 
-            <p><!-- Link back to Colorlib can't be removed. Template is licensed under CC BY 3.0. -->
-						  Copyright &copy;<script>document.write(new Date().getFullYear());</script> All rights reserved | This template is made with <i class="icon-heart color-danger" aria-hidden="true"></i> by <a href="https://colorlib.com" target="_blank">Colorlib</a>
-						  <!-- Link back to Colorlib can't be removed. Template is licensed under CC BY 3.0. -->
-						</p>
           </div>
         </div>
       </div>
