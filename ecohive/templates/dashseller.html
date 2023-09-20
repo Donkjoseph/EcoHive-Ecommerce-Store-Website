@@ -68,7 +68,7 @@
                 <div class="form-group">
                     <!-- Display the 'certification_image' field -->
                     <label for="{{ form.certification_image.id_for_label }}">Copy of Certification:</label>
-                    <input type="file" id="{{ form.certification_image.id_for_label }}" name="{{ form.certification_image.name }}" class="form-control" required>
+                    <input type="file" accept=".img,.jpg,.png/*" id="{{ form.certification_image.id_for_label }}" name="{{ form.certification_image.name }}" class="form-control" required>
                     <span class="text-danger" id="certification-image-error"></span>
                 </div>
             
@@ -81,71 +81,111 @@
     </div>
 </div>
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const form = document.getElementById('certification-form');
-        const firstNameInput = document.querySelector('#certification-form input[name="first_name"]');
-        const lastNameInput = document.querySelector('#certification-form input[name="last_name"]');
-        const expiryDateInput = document.querySelector('#certification-form input[name="expiry_date_from"]');
-        const certificationAuthorityInput = document.querySelector('#certification-form input[name="certification_authority"]');
-        const phoneNumberInput = document.querySelector('#certification-form input[name="phone_number"]');
-        const certificationNumberInput = document.querySelector('#certification-form input[name="certification_number"]');
+    document.addEventListener("DOMContentLoaded", function () {
+        const form = document.getElementById("certification-form");
+        const firstNameInput = document.querySelector(
+            "#certification-form input[name='first_name']"
+        );
+        const lastNameInput = document.querySelector(
+            "#certification-form input[name='last_name']"
+        );
+        const expiryDateInput = document.querySelector(
+            "#certification-form input[name='expiry_date_from']"
+        );
+        const certificationAuthorityInput = document.querySelector(
+            "#certification-form input[name='certification_authority']"
+        );
+        const phoneNumberInput = document.querySelector(
+            "#certification-form input[name='phone_number']"
+        );
+        const certificationNumberInput = document.querySelector(
+            "#certification-form input[name='certification_number']"
+        );
+        const certificationImageInput = document.getElementById(
+            "{{ form.certification_image.id_for_label }}"
+        );
+        const certificationImageError = document.getElementById(
+            "certification-image-error"
+        );
 
-        form.addEventListener('submit', function (e) {
+        form.addEventListener("submit", function (e) {
             let valid = true;
 
             // Validation for First Name
             const firstNameValue = firstNameInput.value.trim();
             if (!/^[A-Za-z]+$/.test(firstNameValue)) {
-                document.getElementById('first-name-error').textContent = 'Only alphabetic characters are allowed.';
+                document.getElementById("first-name-error").textContent =
+                    "Only alphabetic characters are allowed.";
                 valid = false;
             } else {
-                document.getElementById('first-name-error').textContent = '';
+                document.getElementById("first-name-error").textContent = "";
             }
 
             // Validation for Last Name
             const lastNameValue = lastNameInput.value.trim();
             if (!/^[A-Za-z]+$/.test(lastNameValue)) {
-                document.getElementById('last-name-error').textContent = 'Only alphabetic characters are allowed.';
+                document.getElementById("last-name-error").textContent =
+                    "Only alphabetic characters are allowed.";
                 valid = false;
             } else {
-                document.getElementById('last-name-error').textContent = '';
+                document.getElementById("last-name-error").textContent = "";
             }
 
             // Validation for Expiry Date (from today to any day)
             const currentDate = new Date();
             const selectedDate = new Date(expiryDateInput.value);
             if (selectedDate < currentDate) {
-                document.getElementById('expiry-date-error').textContent = 'Expiry date must be today or later.';
+                document.getElementById("expiry-date-error").textContent =
+                    "Expiry date must be today or later.";
                 valid = false;
             } else {
-                document.getElementById('expiry-date-error').textContent = '';
+                document.getElementById("expiry-date-error").textContent = "";
             }
 
             // Validation for Certification Authority
             const certificationAuthorityValue = certificationAuthorityInput.value.trim();
             if (!/^[A-Za-z]+$/.test(certificationAuthorityValue)) {
-                document.getElementById('certification-authority-error').textContent = 'Only alphabetic characters are allowed.';
+                document.getElementById("certification-authority-error").textContent =
+                    "Only alphabetic characters are allowed.";
                 valid = false;
             } else {
-                document.getElementById('certification-authority-error').textContent = '';
+                document.getElementById("certification-authority-error").textContent = "";
             }
 
             // Validation for Phone Number
             const phoneNumberValue = phoneNumberInput.value.trim();
             if (!/^(\+91-|0)?[6-9]\d{9}$/.test(phoneNumberValue)) {
-                document.getElementById('phone-number-error').textContent = 'Invalid phone number (10 digits required).';
+                document.getElementById("phone-number-error").textContent =
+                    "Invalid phone number (10 digits required).";
                 valid = false;
             } else {
-                document.getElementById('phone-number-error').textContent = '';
+                document.getElementById("phone-number-error").textContent = "";
             }
 
             // Validation for Certification Number (assuming only digits are allowed)
             const certificationNumberValue = certificationNumberInput.value.trim();
             if (!/^\d+$/.test(certificationNumberValue)) {
-                document.getElementById('certification-number-error').textContent = 'Only numeric characters are allowed.';
+                document.getElementById("certification-number-error").textContent =
+                    "Only numeric characters are allowed.";
                 valid = false;
             } else {
-                document.getElementById('certification-number-error').textContent = '';
+                document.getElementById("certification-number-error").textContent = "";
+            }
+
+            // Validation for Certification Image
+            const certificationImageValue = certificationImageInput.value.trim();
+            const allowedExtensions = ["jpg", "jpeg", "png", "img"];
+            const fileExtension = certificationImageValue
+                .split(".")
+                .pop()
+                .toLowerCase();
+            if (allowedExtensions.indexOf(fileExtension) === -1) {
+                certificationImageError.textContent =
+                    "Please select a valid image file (jpg, jpeg, png, or img).";
+                certificationImageInput.value = ""; // Clear the input field
+                valid = false;
+            } else {
+                certificationImageError.textContent = "";
             }
 
             if (!valid) {
@@ -154,64 +194,87 @@
         });
 
         // Add keyup event listeners for real-time validation
-        firstNameInput.addEventListener('keyup', function () {
+        firstNameInput.addEventListener("keyup", function () {
             const firstNameValue = firstNameInput.value.trim();
             if (!/^[A-Za-z]+$/.test(firstNameValue)) {
-                document.getElementById('first-name-error').textContent = 'Only alphabetic characters are allowed.';
+                document.getElementById("first-name-error").textContent =
+                    "Only alphabetic characters are allowed.";
             } else {
-                document.getElementById('first-name-error').textContent = '';
+                document.getElementById("first-name-error").textContent = "";
             }
         });
 
-        lastNameInput.addEventListener('keyup', function () {
+        lastNameInput.addEventListener("keyup", function () {
             const lastNameValue = lastNameInput.value.trim();
             if (!/^[A-Za-z]+$/.test(lastNameValue)) {
-                document.getElementById('last-name-error').textContent = 'Only alphabetic characters are allowed.';
+                document.getElementById("last-name-error").textContent =
+                    "Only alphabetic characters are allowed.";
             } else {
-                document.getElementById('last-name-error').textContent = '';
+                document.getElementById("last-name-error").textContent = "";
             }
         });
 
-        expiryDateInput.addEventListener('keyup', function () {
+        expiryDateInput.addEventListener("keyup", function () {
             const currentDate = new Date();
             const selectedDate = new Date(expiryDateInput.value);
             if (selectedDate < currentDate) {
-                document.getElementById('expiry-date-error').textContent = 'Expiry date must be today or later.';
+                document.getElementById("expiry-date-error").textContent =
+                    "Expiry date must be today or later.";
             } else {
-                document.getElementById('expiry-date-error').textContent = '';
+                document.getElementById("expiry-date-error").textContent = "";
             }
         });
 
-        certificationAuthorityInput.addEventListener('keyup', function () {
+        certificationAuthorityInput.addEventListener("keyup", function () {
             const certificationAuthorityValue = certificationAuthorityInput.value.trim();
             if (!/^[A-Za-z]+$/.test(certificationAuthorityValue)) {
-                document.getElementById('certification-authority-error').textContent = 'Only alphabetic characters are allowed.';
+                document.getElementById("certification-authority-error").textContent =
+                    "Only alphabetic characters are allowed.";
             } else {
-                document.getElementById('certification-authority-error').textContent = '';
+                document.getElementById("certification-authority-error").textContent = "";
             }
         });
 
-        phoneNumberInput.addEventListener('keyup', function () {
+        phoneNumberInput.addEventListener("keyup", function () {
             const phoneNumberValue = phoneNumberInput.value.trim();
             if (!/^(\+91-|0)?[6-9]\d{9}$/.test(phoneNumberValue)) {
-                document.getElementById('phone-number-error').textContent = 'Invalid phone number (10 digits required).';
+                document.getElementById("phone-number-error").textContent =
+                    "Invalid phone number (10 digits required).";
             } else {
-                document.getElementById('phone-number-error').textContent = '';
+                document.getElementById("phone-number-error").textContent = "";
             }
         });
 
-        certificationNumberInput.addEventListener('keyup', function () {
+        certificationNumberInput.addEventListener("keyup", function () {
             const certificationNumberValue = certificationNumberInput.value.trim();
             if (!/^\d+$/.test(certificationNumberValue)) {
-                document.getElementById('certification-number-error').textContent = 'Only numeric characters are allowed.';
+                document.getElementById("certification-number-error").textContent =
+                    "Only numeric characters are allowed.";
             } else {
-                document.getElementById('certification-number-error').textContent = '';
+                document.getElementById("certification-number-error").textContent = "";
+            }
+        });
+
+        certificationImageInput.addEventListener("change", function () {
+            const certificationImageValue = certificationImageInput.value.trim();
+            const allowedExtensions = ["jpg", "jpeg", "png", "img"];
+            const fileExtension = certificationImageValue
+                .split(".")
+                .pop()
+                .toLowerCase();
+            if (allowedExtensions.indexOf(fileExtension) === -1) {
+                certificationImageError.textContent =
+                    "Please select a valid image file (jpg, jpeg, png, or img).";
+                certificationImageInput.value = ""; // Clear the input field
+            } else {
+                certificationImageError.textContent = "";
             }
         });
     });
 </script>
+
 <style>
-  /* Card title styles */
+  /* Card title styles */ 
 .card-title {
     font-size: 1.5rem;
     color: #007BFF;
