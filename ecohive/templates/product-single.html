@@ -50,12 +50,13 @@
 		/* Style the "Add to Cart" button */
 .add-to-cart-button {
     background-color: black; /* Button background color */
-    color: black; /* Button text color */
+    color: green; /* Button text color */
     border: none; /* Remove button border */
     border-radius: 5px; /* Add rounded corners */
-    padding: 10px 20px; /* Adjust button padding */
     font-size: 16px; /* Button text size */
     cursor: pointer; /* Add pointer cursor on hover */
+	margin-left: 15px;
+	width:225px;
 }
 
 /* Style the "Add to Cart" button on hover */
@@ -211,8 +212,10 @@
 						</div>
 						{% if is_in_cart %}
 						<p>Product is already in your cart ({{ cart_quantity }} in cart).</p>
+						<button type="submit" class="add-to-cart-button">Update Cart</button>
 						{% else %}
-						<button type="submit" class="add-to-cart-button">Add to Cart</button>
+						<button type="submit" class="add-to-cart-button" >Add to Cart</button><br><br>
+						<button type="submit" class="add-to-cart-button" >Buy Now</button>
 						{% endif %}
 					</form>
 				</div>

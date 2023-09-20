@@ -168,3 +168,10 @@ LOGOUT_REDIRECT_URL = "/"
 
 
 # ACCOUNT_EMAIL_VERIFICATION='none'   
+
+#payment
+
+
+RAZOR_KEY_ID = 'rzp_test_4xAjz8XY2Rc0tE'
+RAZOR_KEY_SECRET = '69Mk87Zq4kydNx2tnQZ6Zwg5'
+

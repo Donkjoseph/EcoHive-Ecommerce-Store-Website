@@ -45,7 +45,31 @@
 		.product-name h3 {
 			font-size: 1.2rem; /* Adjust font size for product names */
 		}
-	
+    .btn-update-quantity {
+      background-color: white; /* Blue background color */
+      color: #fff; /* White text color */
+      cursor: pointer; /* Show a pointer cursor on hover */
+      border-radius: 5px; /* Rounded corners */
+  }
+
+  /* Style for the "Remove From Cart" button */
+  .btn-remove-from-cart {
+      background-color: white; /* Red background color */
+      color: #fff; /* White text color */
+      cursor: pointer; /* Show a pointer cursor on hover */
+      border-radius: 5px; /* Rounded corners */
+  }
+      /* Style for the quantity input field */
+      .quantity-input {
+        width: 40px; /* Adjust the width as needed */
+        margin-right: 5px; /* Add spacing between input and button */
+    }
+
+    /* Optional: Align the button and input vertically */
+    .button-container {
+        display: flex;
+        align-items: center;
+    }
 		/* You can add more CSS styles to further customize the table appearance */
 	</style>
   </head>
@@ -189,12 +213,18 @@
                                     <h3>{{ cart_item.product.product_name }}</h3>
                                 </td>
                                 <td class="price">RS {{ cart_item.product.product_price }}</td>
-                                <td class="quantity">{{ cart_item.quantity }}</td>
+                                <td class="quantity">
+                                  <form action="{% url 'update_cart_item' cart_item.id %}" method="post">
+                                      {% csrf_token %}
+                                      <input type="number" name="quantity" value="{{ cart_item.quantity }}" min="1" class="quantity-input">
+                                      <button type="submit" class="btn btn-update-quantity">Update Quantity</button>
+                                  </form>
+                              </td>
                                 <td class="total">RS {{ cart_item.price }}</td>
                                 <td class="remove-from-cart">
                                     <form action="{% url 'remove_from_cart' cart_item.id %}" method="post">
                                         {% csrf_token %}
-                                        <button type="submit" class="btn ">Remove From Cart</button>
+                                        <button type="submit" class="btn btn-remove-from-cart">Remove From Cart</button>
                                     </form>
                                 </td>
                             </tr><!-- END TR-->
@@ -207,7 +237,97 @@
                 </div>
             </div>
         </div>
+        <div class="row justify-content-end">
+    			<div class="col-lg-4 mt-5 cart-wrap ftco-animate">
+    				<div class="cart-total mb-3">
+    					<h3>Coupon Code</h3>
+    					<p>Enter your coupon code if you have one</p>
+  						<form action="#" class="info">
+	              <div class="form-group">
+	              	<label for="">Coupon code</label>
+	                <input type="text" class="form-control text-left px-3" placeholder="">
+	              </div>
+	            </form>
+    				</div>
+    				<p><a href="checkout.html" class="btn btn-primary py-3 px-4">Apply Coupon</a></p>
+    			</div>
+    			<div class="col-lg-4 mt-5 cart-wrap ftco-animate">
+    				<div class="cart-total mb-3">
+    					<h3>Estimate shipping and tax</h3>
+    					<p>Enter your destination to get a shipping estimate</p>
+  						<form action="#" class="info">
+	              <div class="form-group">
+	              	<label for="">Country</label>
+	                <input type="text" class="form-control text-left px-3" placeholder="">
+	              </div>
+	              <div class="form-group">
+	              	<label for="country">State/Province</label>
+	                <input type="text" class="form-control text-left px-3" placeholder="">
+	              </div>
+	              <div class="form-group">
+	              	<label for="country">Zip/Postal Code</label>
+	                <input type="text" class="form-control text-left px-3" placeholder="">
+	              </div>
+	            </form>
+    				</div>
+    				<p><a href="checkout.html" class="btn btn-primary py-3 px-4">Estimate</a></p>
+    			</div>
+    			<div class="col-lg-4 mt-5 cart-wrap ftco-animate">
+    				<div class="cart-total mb-3">
+    					<h3>Cart Totals</h3>
+    					<p class="d-flex">
+    						<span>Subtotal</span>
+    						<span>RS {{ total_price|floatformat:2 }}</span>
+    					</p>
+    					<p class="d-flex">
+    						<span>Delivery</span>
+    						<span>RS 0.00</span>
+    					</p>
+    					<p class="d-flex">
+    						<span>Discount</span>
+    						<span>RS 0.00</span>
+    					</p>
+    					<hr>
+    					<p class="d-flex total-price">
+    						<span>Total</span>
+    						<span id="total-amount">RS {{ total_price|floatformat:2 }}</span>
+    					</p>
+    				</div>
+    				<button class="btn" id="pay-btn">Proceed to Checkout</button>
+						{% comment %} <a href="checkout.html" class="btn btn-primary py-3 px-4">Proceed to Checkout</a></p> {% endcomment %}
+    			</div>
+    		</div>
     </div>
+	<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+  <script>
+    var options = {
+       
+      // Enter the Key ID generated from the Dashboard
+      key: "{{ razorpay_merchant_key }}",
+       
+      // Amount is in currency subunits.
+      // Default currency is INR. Hence,
+      // 50000 refers to 50000 paise
+      amount: "{{ razorpay_amount }}",
+      currency: "{{ currency }}",
+       
+      // Your/store name.
+      name: "Dj Razorpay",
+       
+      // Pass the `id` obtained in the response of Step 1
+      order_id: "{{ razorpay_order_id }}",
+      callback_url: "{{ callback_url }}",
+    };
+     
+    // initialise razorpay with the options.
+    var rzp1 = new Razorpay(options);
+     
+    // add event listener to the payment button.
+    document.getElementById("pay-btn").onclick = function (e) {
+      rzp1.open();
+      e.preventDefault();
+    };
+  </script>
 </section>
 
 		<section class="ftco-section ftco-no-pt ftco-no-pb py-5 bg-light">
