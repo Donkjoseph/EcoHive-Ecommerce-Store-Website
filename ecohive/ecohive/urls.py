@@ -90,6 +90,11 @@ urlpatterns = [
     path('cart/', views.cart_view, name='cart'),
     path('remove_from_cart/<int:cart_item_id>/', views.remove_from_cart, name='remove_from_cart'),
     path('update_cart_item/<int:cart_item_id>/', views.update_cart_item, name='update_cart_item'),
+    path('payment', views.payment, name='payment'),
+    path('payment_confirm/', views.payment_confirm, name='payment_confirm'),
+    path('orders/', views.orders, name='orders'),
+
+
 
     path('about', views.about, name='about'),
     path('shop', views.shop, name='shop'),
@@ -99,6 +104,7 @@ urlpatterns = [
     #payment
     path('paymenthandler/', views.paymenthandler, name='paymenthandler'),
     path('paymentsuccess/', views.paymentsuccess, name='productsuccess'),
+
 
 
 

@@ -1,0 +1,216 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Vegefoods - Free Bootstrap 4 Template by Colorlib</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    
+    <!-- Include your CSS links -->
+    <link href="https://fonts.googleapis.com/css?family=Poppins:200,300,400,500,600,700,800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Lora:400,400i,700,700i&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Amatic+SC:400,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/open-iconic-bootstrap.min.css' %}">
+    <link rel="stylesheet" href="{% static 'css/animate.css' %}">
+    <link rel="stylesheet" href="{% static 'css/owl.carousel.min.css' %}">
+    <link rel="stylesheet" href="{% static 'css/owl.theme.default.min.css' %}">
+    <link rel="stylesheet" href="{% static 'css/magnific-popup.css' %}">
+    <link rel="stylesheet" href="{% static 'css/aos.css' %}">
+    <link rel="stylesheet" href="{% static 'css/ionicons.min.css' %}">
+    <link rel="stylesheet" href="{% static 'css/bootstrap-datepicker.css' %}">
+    <link rel="stylesheet" href="{% static 'css/jquery.timepicker.css' %}">
+    <link rel="stylesheet" href="{% static 'css/flaticon.css' %}">
+    <link rel="stylesheet" href="{% static 'css/icomoon.css' %}">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    
+    <!-- Include your custom CSS styles -->
+    <style>
+        /* Add your custom styles here */
+    </style>
+</head>
+<body class="goto-here">
+    <div class="py-1 bg-primary">
+    	<div class="container">
+    		<div class="row no-gutters d-flex align-items-start align-items-center px-md-0">
+	    		<div class="col-lg-12 d-block">
+		    		<div class="row d-flex">
+		    			<div class="col-md pr-4 d-flex topper align-items-center">
+					    	<div class="icon mr-2 d-flex justify-content-center align-items-center"><span class="icon-phone2"></span></div>
+						    <span class="text">+ 1235 2355 98</span>
+					    </div>
+					    <div class="col-md pr-4 d-flex topper align-items-center">
+					    	<div class="icon mr-2 d-flex justify-content-center align-items-center"><span class="icon-paper-plane"></span></div>
+						    <span class="text">youremail@email.com</span>
+					    </div>
+					    <div class="col-md-5 pr-4 d-flex topper align-items-center text-lg-right">
+						    <span class="text">3-5 Business days delivery &amp; Free Returns</span>
+					    </div>
+				    </div>
+			    </div>
+		    </div>
+		  </div>
+    </div>
+	<nav class="navbar navbar-expand-lg navbar-dark ftco_navbar bg-dark ftco-navbar-light" id="ftco-navbar">
+		<div class="container">
+		  <a class="navbar-brand" href="{% url 'index' %}">Eco Hive</a>
+		  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#ftco-nav" aria-controls="ftco-nav" aria-expanded="false" aria-label="Toggle navigation">
+			<span class="oi oi-menu"></span> Menu
+		  </button>
+	  
+		  <div class="collapse navbar-collapse" id="ftco-nav">
+			<ul class="navbar-nav ml-auto">
+				{% if user.is_authenticated %}
+				{% if user.is_superuser %}
+				<li class="nav-item"> <a class="nav-link" href="{% url 'admindash' %}">Admin Dashboard</a></li>
+				{% elif user.is_seller %}
+				<li class="nav-item"><a class="nav-link" href="{% url 'dashseller' %}">Seller Dashboard</a></li>
+				{% endif %}
+				{% endif %}
+			  <li class="nav-item active"><a href="{% url 'index' %}" class="nav-link">Home</a></li>
+			  <li class="nav-item dropdown">
+				<a class="nav-link dropdown-toggle" href="{% url 'shop' %}" id="dropdown04" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Shop</a>
+				<div class="dropdown-menu" aria-labelledby="dropdown04">
+				  <a class="dropdown-item" href="{% url 'shop' %}">Shop</a>
+				  <a class="dropdown-item" href="{% url 'wishlist' %}">Wishlist</a>
+				  <a class="dropdown-item" href="{% url 'cart' %}">Cart</a>
+				  <a class="dropdown-item" href="{% url 'checkout' %}">Checkout</a>
+				</div>
+			  </li>
+			  <li class="nav-item"><a href="{% url 'about' %}" class="nav-link">About</a></li>
+			  <li class="nav-item"><a href="#" class="nav-link">Blog</a></li>
+			  <li class="nav-item"><a href="#" class="nav-link">Contact</a></li>
+			  <li class="nav-item cta cta-colored"><a href="cart.html" class="nav-link"><span class="icon-shopping_cart"></span>[0]</a></li>
+	  
+			  <!-- Added Login and Registration buttons -->
+			  {% if user.is_authenticated %}
+	<div class="navbar-collapse justify-content-end px-0" id="navbarNav">
+            <ul class="navbar-nav flex-row ms-auto align-items-center justify-content-end">
+              <p class="me-3">Welcome, {{ user.username }}</p>
+              <li class="nav-item dropdown">
+                <a class="nav-link nav-icon-hover" href="javascript:void(0)" id="drop2" data-bs-toggle="dropdown" aria-expanded="false">
+					{% if user.userprofile.profile_pic %}
+					  <img src="{{ user.userprofile.profile_pic.url }}" alt="" width="35" height="35" class="rounded-circle">
+					{% else %}
+					  <img src="{% static 'admin/assets/images/profile/user-1.jpg' %}" alt="" width="35" height="35" class="rounded-circle">
+					{% endif %}
+				  </a> 
+                <div class="dropdown-menu dropdown-menu-end dropdown-menu-animate-up" aria-labelledby="drop2">
+                  <div class="message-body">
+                    <a href="{% url 'profile' %}" class="d-flex align-items-center gap-2 dropdown-item">
+                        <i class="ti ti-user fs-6"></i>
+                        <p class="mb-0 fs-3">My Profile</p>
+                      </a>
+                    <a href="javascript:void(0)" class="d-flex align-items-center gap-2 dropdown-item">
+                      <i class="ti ti-mail fs-6"></i>
+                      <p class="mb-0 fs-3">My Account</p>
+                    </a>
+                    <a href="{% url 'loggout' %}" class="nav-link mx-3 mt-2 d-block" style="color:black;">Logout</a>
+                  </div>
+                </div>
+              </li>
+            </ul>
+          </div>
+				{% else %}
+				<a href="{% url 'login' %}" class="nav-link" style="color:black; margin-top:13px;">Login</a>
+				<a href="{% url 'register' %}" class="nav-link" style="color:black;  margin-top:13px;">Register</a>
+			 {% comment %} </li>
+			<li class="nav-item dropdown">
+				<a href="#" class="nav-link dropdown-toggle" id="registerDropdown" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+					Register
+				</a>
+				<div class="dropdown-menu" aria-labelledby="registerDropdown"> {% endcomment %}
+					
+					{% comment %} <a class="dropdown-item" href="{% url 'customer_register' %}">Register as Customer</a> {% endcomment %}
+				{% comment %} </div> {% endcomment %}
+    	{% endif %}
+			{% comment %} </li> {% endcomment %}
+			</ul>
+		  </div>
+		</div>
+	  </nav>
+
+    <div class="hero-wrap hero-bread"style="background-image: url({% static 'images/bg_1.jpg' %});">
+        <div class="container">
+          <div class="row no-gutters slider-text align-items-center justify-content-center">
+            <div class="col-md-9 ftco-animate text-center">
+                <p class="breadcrumbs"><span class="mr-2"><a href="{% url 'index' %}">Home</a></span> <span>Orders</span></p>
+              <h1 class="mb-0 bread">Orders</h1>
+            </div>
+          </div>
+        </div>
+      </div>        <!-- ... Hero section content ... -->
+    </div>
+
+    <!-- Add a section for displaying order details -->
+    <section class="ftco-section ftco-cart">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-12 ftco-animate">
+                    <div class="cart-list">
+                        <h2>Order Details</h2>
+                        <table class="table">
+                            <thead class="thead-primary">
+                                <tr class="text-center">
+                                    <th>Order ID</th>
+                                    <th>Order Date</th> <!-- Added the Order Date column -->
+                                    <th>Product Name</th>
+                                    <th>Price</th>
+                                    <th>Quantity</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for order in orders %}
+                                {% for order_item in order.order_items.all %}
+                                <tr class="text-center">
+                                    <td>{{ order.id }}</td>
+                                    <td>{{ order.order_date|date:"F j, Y H:i" }}</td> <!-- Display the order date -->
+                                    <td>{{ order_item.product.product_name }}</td>
+                                    <td>RS {{ order_item.product.product_price }}</td>
+                                    <td>{{ order_item.quantity }}</td>
+                                </tr>
+                                {% endfor %}
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    <!-- Display the total price for each order -->
+                    {% for order in orders %}
+                    <div class="cart-total" style="text-align: center;">
+                        <h6>Total Paid Amount is : RS {{ order.total_price|floatformat:2 }}</h6>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Include your footer here (similar to your cart page) -->
+    <footer class="ftco-footer ftco-section">
+        <!-- ... Footer content ... -->
+    </footer>
+
+    <!-- Include your JavaScript libraries and custom scripts -->
+    <script src="{% static 'js/jquery.min.js' %}"></script>
+    <script src="{% static 'js/jquery-migrate-3.0.1.min.js' %}"></script>
+    <script src="{% static 'js/popper.min.js' %}"></script>
+    <script src="{% static 'js/bootstrap.min.js' %}"></script>
+    <script src="{% static 'js/jquery.easing.1.3.js' %}"></script>
+    <script src="{% static 'js/jquery.waypoints.min.js' %}"></script>
+    <script src="{% static 'js/jquery.stellar.min.js' %}"></script>
+    <script src="{% static 'js/owl.carousel.min.js' %}"></script>
+    <script src="{% static 'js/jquery.magnific-popup.min.js' %}"></script>
+    <script src="{% static 'js/aos.js' %}"></script>
+    <script src="{% static 'js/jquery.animateNumber.min.js' %}"></script>
+    <script src="{% static 'js/bootstrap-datepicker.js' %}"></script>
+    <script src="{% static 'js/scrollax.min.js' %}"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&sensor=false"></script>
+    <script src="{% static 'js/google-map.js' %}"></script>
+    <script src="{% static 'js/main.js' %}"></script>
+    
+    <!-- Include any additional scripts you may need -->
+    <script>
+        // Your custom JavaScript code goes here
+    </script>
+</body>
+</html>

@@ -594,6 +594,7 @@ def product_single(request, product_id):
     existing_cart_item = Cart.objects.filter(user=user, product=product).first()
     is_in_cart = existing_cart_item is not None
 
+
     if request.method == 'POST':
         # If it's a POST request, get the quantity from the form
         quantity = int(request.POST.get('quantity', 1))  # Default to 1 if not provided
@@ -608,49 +609,8 @@ def product_single(request, product_id):
             existing_cart_item.save()
 
         return redirect('cart')  # Redirect to the cart page or any other page you prefer
-
+        
     return render(request, 'product-single.html', {'product': product, 'is_in_cart': is_in_cart})
-
-def checkout(request):
-    # Add your logic here
-    return render(request, 'checkout.html')
-
-@login_required
-def cart_view(request):
-    # Retrieve the user's cart items
-    cart_items = Cart.objects.filter(user=request.user)
-
-    # Calculate the total price of items in the cart
-    total_price = sum(cart_item.product.product_price * cart_item.quantity for cart_item in cart_items)
-
-    # Razorpay configuration
-    razorpay_client = razorpay.Client(auth=(settings.RAZOR_KEY_ID, settings.RAZOR_KEY_SECRET))
-    currency = 'INR'
-    amount = int(total_price * 100)  # Convert total_price to paisa (assuming price is in rupees)
-
-    # Create a Razorpay Order
-    razorpay_order = razorpay_client.order.create(
-        dict(amount=amount, currency=currency, payment_capture='0')
-    )
-
-    # Extract the order id of the newly created order
-    razorpay_order_id = razorpay_order['id']
-
-    # Define the callback URL
-    callback_url = '/paymenthandler/'  # Update this URL to your actual payment handler
-
-    # Pass these details to the frontend
-    context = {
-        'cart_items': cart_items,
-        'total_price': total_price,
-        'razorpay_order_id': razorpay_order_id,
-        'razorpay_merchant_key': settings.RAZOR_KEY_ID,
-        'razorpay_amount': amount,
-        'currency': currency,
-        'callback_url': callback_url,
-    }
-
-    return render(request, 'cart.html', context)
 
 
 def remove_from_cart(request, cart_item_id):
@@ -708,6 +668,86 @@ def category_fruits(request):
 
     return render(request, 'category_fruits.html', context)
 
+
+    
+def paymentsuccess(request):
+    # Add your logic here
+    return render(request, 'paymentsuccess.html')
+
+
+def cart_view(request):
+    # Assuming you have user authentication and each user has a unique cart
+    user = request.user
+
+    # Retrieve the user's cart items
+    cart_items = Cart.objects.filter(user=user)
+
+    # Calculate the total price of items in the cart
+    total_price = sum(cart_item.product.product_price * cart_item.quantity for cart_item in cart_items)
+
+    context = {
+        'cart_items': cart_items,
+        'total_price': total_price,
+    }
+
+    return render(request, 'cart.html', context)
+
+from .models import BillingDetails, Order, Cart, OrderItem  # Import your models here
+from django.shortcuts import render, redirect
+from decimal import Decimal
+
+from django.db import transaction
+
+@transaction.atomic
+def checkout(request):
+    total_price = 0  # Initialize total_price outside the if block
+    cart_items = Cart.objects.filter(user=request.user)  # Define cart_items here
+
+    if request.method == 'POST' and 'place_order' in request.POST:
+        # Retrieve form data for billing details
+        first_name = request.POST.get('firstname')
+        last_name = request.POST.get('lastname')
+        state = request.POST.get('state')
+        street_address = request.POST.get('streetaddress')
+        apartment_suite_unit = request.POST.get('apartmentsuiteunit')
+        town_city = request.POST.get('towncity')
+        postcode_zip = request.POST.get('postcodezip')
+        phone = request.POST.get('phone')
+        email = request.POST.get('emailaddress')
+
+        # Create BillingDetails object (assuming BillingDetails is a separate model)
+        billing_details = BillingDetails(
+            user=request.user,  # Replace with the authenticated user or user session data
+            first_name=first_name,
+            last_name=last_name,
+            state=state,
+            street_address=street_address,
+            apartment_suite_unit=apartment_suite_unit,
+            town_city=town_city,
+            postcode_zip=postcode_zip,
+            phone=phone,
+            email=email,
+        )
+        billing_details.save()
+
+        total_price = sum(item.product.product_price * item.quantity for item in cart_items)  # Calculate total_price here
+
+        # Convert total_price to a float before storing it in the session
+        request.session['order_total'] = float(total_price)
+
+        # Redirect to the payment page to complete the order
+        return redirect('payment')
+
+    # If it's not a POST request or not a place order request, continue displaying the cart items
+    total_price = sum(item.product.product_price * item.quantity for item in cart_items)  # Calculate total_price here
+
+    # Convert total_price to a float before passing it to the template
+    context = {
+        'cart_items': cart_items,
+        'total_price': float(total_price),
+    }
+
+    return render(request, 'checkout.html', context)
 #payment
 from django.shortcuts import render
 import razorpay
@@ -746,7 +786,7 @@ def paymenthandler(request):
                     razorpay_client.payment.capture(payment_id, amount)
  
                     # render success page on successful caputre of payment
-                    return render(request, 'paymentsuccess.html')
+                    return render(request, 'payment.html')
                 except:
  
                     # if there is an error while capturing payment.
@@ -762,7 +802,91 @@ def paymenthandler(request):
     else:
        # if other than POST request is made.
         return HttpResponseBadRequest()
+
+
+def payment(request):
+    if request.method == 'POST':
+        # Retrieve the total price from the session
+        total_price = request.session.get('order_total')
+
+        if total_price is not None:
+            # Create an Order object
+            order = Order(
+                user=request.user,  # Replace with the authenticated user or user session data
+                total_price=total_price,
+                # Add other order details as needed
+            )
+            order.save()
+
+            # Retrieve the cart items for the user
+            cart_items = Cart.objects.filter(user=request.user)
+
+            # Create OrderItem objects and associate them with the order
+            for cart_item in cart_items:
+                order_item = OrderItem(
+                    order=order,
+                    product=cart_item.product,
+                    quantity=cart_item.quantity,
+                )
+                order_item.save()
+
+            # Remove the stored total price from the session
+            del request.session['order_total']
+
+            # Remove cart items associated with the user
+            cart_items.delete()
+            request.session['order_total'] = float(total_price)
+
+            # You can also send an order confirmation email or perform other actions here
+            # Redirect to a thank you page or order confirmation page
+            return redirect('payment_confirm')
+
+    # If it's not a POST request or if the payment hasn't been completed yet, you can render the payment page
+    cart_items = Cart.objects.filter(user=request.user)  # Retrieve the list of products in the cart
+    total_price = request.session.get('order_total', 0)  # Default to 0 if 'order_total' is not in the session
+
+
+    context = {
+        'cart_items': cart_items,
+        'total_price': total_price,  # Include total_price in the context
+    }
+
+    return render(request, 'payment.html', context)
+
+@login_required
+def payment_confirm(request):
+    total_price = request.session.get('order_total')
+
+    # Razorpay integration code goes here
+    currency = 'INR'
+    amount = int(total_price * 100)  # Convert total_price to paisa (assuming price is in rupees)
+
+    # Create a Razorpay Order
+    razorpay_order = razorpay_client.order.create(
+        dict(amount=amount, currency=currency, payment_capture='0')
+    )
+
+    # Extract the order id of the newly created order
+    razorpay_order_id = razorpay_order['id']
+
+    # Define the callback URL
+    callback_url = '/paymenthandler/'  # Update this URL to your actual payment handler
+
+    # Pass these details to the frontend
+    context = {
+        'total_price': total_price,
+        'razorpay_order_id': razorpay_order_id,
+        'razorpay_merchant_key': settings.RAZOR_KEY_ID,
+        'razorpay_amount': amount,
+        'currency': currency,
+        'callback_url': callback_url,
+    }
+
+    return render(request, 'payment_confirm.html', context)
+
+@login_required
+def orders(request):
+    # Retrieve a list of orders for the current user
+    orders = Order.objects.filter(user=request.user)
     
-def paymentsuccess(request):
-    # Add your logic here
-    return render(request, 'paymentsuccess.html')
+    return render(request, 'orders.html', {'orders': orders})

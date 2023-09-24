@@ -169,3 +169,42 @@ class Cart(models.Model):
         # Calculate the price based on the product's price per kg and the quantity
         self.price = self.product.product_price * self.quantity
         super().save(*args, **kwargs)
+
+class Payment(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)  # ForeignKey to the User model
+    order_id = models.CharField(max_length=255)  # Razorpay Order ID
+    amount = models.DecimalField(max_digits=10, decimal_places=2)  # Amount in INR
+    currency = models.CharField(max_length=3, default='INR')  # Currency code
+    payment_status = models.CharField(max_length=20)  # Payment status (e.g., 'success', 'pending', 'failed')
+    payment_date = models.DateTimeField(auto_now_add=True)  # Date and time of payment
+    # Add more fields as needed, such as product, etc.
+
+    def __str__(self):
+        return f"Payment ID: {self.id}, Order ID: {self.order_id}"
+    
+class BillingDetails(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)  # If you want to associate the billing details with a user
+    first_name = models.CharField(max_length=255)
+    last_name = models.CharField(max_length=255)
+    state = models.CharField(max_length=255)
+    street_address = models.CharField(max_length=255)
+    apartment_suite_unit = models.CharField(max_length=255, blank=True, null=True)  # Optional field
+    town_city = models.CharField(max_length=255)
+    postcode_zip = models.CharField(max_length=20)
+    phone = models.CharField(max_length=20)
+    email = models.EmailField()
+
+    def __str__(self):
+        return f"{self.first_name} {self.last_name}'s Billing Details"
+class OrderItem(models.Model):
+    order = models.ForeignKey('Order', related_name='order_items', on_delete=models.CASCADE)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    quantity = models.PositiveIntegerField(default=1)  # Add a quantity field
+
+class Order(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    order_date = models.DateTimeField(auto_now_add=True)
+    total_price = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+
+    def __str__(self):
+        return f"Order by {self.user.username} on {self.order_date}"

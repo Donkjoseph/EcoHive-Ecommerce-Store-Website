@@ -64,6 +64,11 @@
     background-color: black; /* Button background color on hover */
     color: black; /* Button text color on hover */
 }
+#cartlink{
+	margin-left: 90px;
+
+}
+
 	</style>
   </head>
   <body class="goto-here">
@@ -178,7 +183,6 @@
         </div>
       </div>
     </div>
-
 	<section class="ftco-section">
 		<div class="container">
 			<div class="row">
@@ -203,6 +207,7 @@
 									<i class="ion-ios-remove"></i>
 								</button>
 							</span>
+							<input type="hidden" name="product_price" value="{{ product.product_price }}">
 							<input type="text" id="quantity" name="quantity" class="form-control input-number" value="1" min="1" max="100">
 							<span class="input-group-btn ml-2">
 								<button type="submit" class="quantity-right-plus btn" data-type="plus" data-field="">
@@ -211,8 +216,9 @@
 							</span>
 						</div>
 						{% if is_in_cart %}
-						<p>Product is already in your cart ({{ cart_quantity }} in cart).</p>
-						<button type="submit" class="add-to-cart-button">Update Cart</button>
+						<p style="margin-left:20px;"> Product is already in your cart </p>
+						<button type="submit" id="pay-btn" class="add-to-cart-button" >Buy Now</button><br><br>
+						<a href="{% url 'cart' %}" id="cartlink" >Go to Cart</a>
 						{% else %}
 						<button type="submit" class="add-to-cart-button" >Add to Cart</button><br><br>
 						<button type="submit" class="add-to-cart-button" >Buy Now</button>
@@ -222,7 +228,36 @@
 			</div>
 		</div>
 	</section>
-	
+	{% comment %} <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+	<script>
+	  var options = {
+		 
+		// Enter the Key ID generated from the Dashboard
+		key: "{{ razorpay_merchant_key }}",
+		 
+		// Amount is in currency subunits.
+		// Default currency is INR. Hence,
+		// 50000 refers to 50000 paise
+		amount: "{{ razorpay_amount }}",
+		currency: "{{ currency }}",
+		 
+		// Your/store name.
+		name: "Dj Razorpay",
+		 
+		// Pass the `id` obtained in the response of Step 1
+		order_id: "{{ razorpay_order_id }}",
+		callback_url: "{{ callback_url }}",
+	  };
+	   
+	  // initialise razorpay with the options.
+	  var rzp1 = new Razorpay(options);
+	   
+	  // add event listener to the payment button.
+	  document.getElementById("pay-btn").onclick = function (e) {
+		rzp1.open();
+		e.preventDefault();
+	  };
+	</script> {% endcomment %}
     {% comment %} <section class="ftco-section">
     	<div class="container">
 				<div class="row justify-content-center mb-3 pb-3">

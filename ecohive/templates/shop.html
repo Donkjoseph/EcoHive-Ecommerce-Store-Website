@@ -212,6 +212,7 @@
             </a>
 						<div class="text py-3 pb-4 px-3 text-center">
 							<h3><a href="{% url 'product_single' product.id %}">{{ product.product_name }}</a></h3>
+              <p>{{ product.seller }}</p>
 							<div class="d-flex">
 								<div class="pricing">
 									<p class="price">RS. {{ product.product_price }}</p>

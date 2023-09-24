@@ -67,3 +67,29 @@ class CartAdmin(admin.ModelAdmin):
     search_fields = ('user__username', 'product__product_name')
 
 admin.site.register(Cart, CartAdmin)
+
+from .models import Payment, BillingDetails, Order, OrderItem
+@admin.register(Payment)
+class PaymentAdmin(admin.ModelAdmin):
+    list_display = ('user', 'order_id', 'amount', 'currency', 'payment_status', 'payment_date')
+    list_filter = ('payment_status', 'currency')
+    search_fields = ('user__username', 'order_id')
+
+@admin.register(BillingDetails)
+class BillingDetailsAdmin(admin.ModelAdmin):
+    list_display = ('user', 'first_name', 'last_name', 'email', 'phone')
+    search_fields = ('user__username', 'email')
+
+class OrderItemInline(admin.TabularInline):
+    model = OrderItem
+    extra = 1  
+@admin.register(Order)
+class OrderAdmin(admin.ModelAdmin):
+    list_display = ('user', 'order_date', 'total_price')
+    list_filter = ('order_date',)
+    inlines = [OrderItemInline]
+
+@admin.register(OrderItem)
+class OrderItemAdmin(admin.ModelAdmin):
+    list_display = ('order', 'product', 'quantity')
+    list_filter = ('order__order_date',)  # Filter by the order's date

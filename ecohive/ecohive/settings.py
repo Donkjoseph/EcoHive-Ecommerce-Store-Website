@@ -151,7 +151,6 @@ AUTH_USER_MODEL = 'ecohiveapp.User'
 
 SITE_ID = 1
 
-SOCIALACCOUNT_LOGIN_ON_GET=True
 
 AUTHENTICATION_BACKENDS = [
     # Needed to login by username in Django admin, regardless of `allauth`
@@ -167,7 +166,9 @@ LOGIN_REDIRECT_URL = "/"
 LOGOUT_REDIRECT_URL = "/"
 
 
-# ACCOUNT_EMAIL_VERIFICATION='none'   
+ACCOUNT_EMAIL_VERIFICATION='none'  
+
+SOCIALACCOUNT_LOGIN_ON_GET=True 
 
 #payment
 
