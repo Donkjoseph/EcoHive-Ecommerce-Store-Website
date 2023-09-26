@@ -30,15 +30,6 @@
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
   </head>
   <style>
-    /* CSS for product images */
-    .product img {
-        max-width: 100%; /* Set the maximum width to ensure responsiveness */
-        height: auto; /* Automatically adjust the height while maintaining aspect ratio */
-        width: 100%; /* Ensure the image takes up 100% of its container's width */
-        /* Set your desired width and height values here */
-        /* width: 200px; */
-        /* height: 200px; */
-    }
 </style>
   <body class="goto-here">
 		<div class="py-1 bg-primary">
@@ -83,7 +74,7 @@
 				  <a class="dropdown-item" href="#">Contact</a>
 				  {% comment %} <a class="dropdown-item" href="{% url 'wishlist' %}">Wishlist</a> {% endcomment %}
 				  <a class="dropdown-item" href="#">Blog</a>
-				  <a class="dropdown-item" href="{% url 'checkout' %}">Checkout</a>
+				  {% comment %} <a class="dropdown-item" href="{% url 'checkout' %}">Checkout</a> {% endcomment %}
 				</div>
 			  </li>
 			  <li class="nav-item"><a href="#" class="nav-link">Wishlist</a></li>
@@ -123,17 +114,7 @@
 				{% else %}
 				<a href="{% url 'login' %}" class="nav-link" style="color:black; margin-top:13px;">Login</a>
 				<a href="{% url 'register' %}" class="nav-link" style="color:black;  margin-top:13px;">Register</a>
-			 {% comment %} </li>
-			<li class="nav-item dropdown">
-				<a href="#" class="nav-link dropdown-toggle" id="registerDropdown" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-					Register
-				</a>
-				<div class="dropdown-menu" aria-labelledby="registerDropdown"> {% endcomment %}
-					
-					{% comment %} <a class="dropdown-item" href="{% url 'customer_register' %}">Register as Customer</a> {% endcomment %}
-				{% comment %} </div> {% endcomment %}
     	{% endif %}
-			{% comment %} </li> {% endcomment %}
 			</ul>
 		  </div>
 		</div>

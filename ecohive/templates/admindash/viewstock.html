@@ -9,7 +9,6 @@
             <tr>
                 <th style="font-weight: bold;">Product Name</th>
                 <th style="font-weight: bold;">Total Stock</th>
-                <th style="font-weight: bold;">Image</th>
                 <th style="font-weight: bold;">Action</th>  <!-- Add this column -->
             </tr>
         </thead>
@@ -18,13 +17,6 @@
                 <tr>
                     <td>{{ summary.product_name }}</td>
                     <td>{{ summary.total_stock }}</td>
-                    <td>
-                        {% if summary.product_image %}
-                            <img src="{{ summary.product_image.url }}" alt="{{ summary.product_name }}" width="100">
-                        {% else %}
-                            No image available
-                        {% endif %}
-                    </td>
                     <td>
                         <a href="{% url 'edit_product_stock' summary.pk %}" class="btn btn-sm btn-primary">Edit</a><br>
                     </td>

@@ -2,7 +2,7 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <title>Vegefoods - Free Bootstrap 4 Template by Colorlib</title>
+    <title>EcoHive - Eco-friendly, organic essentials hub</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     
@@ -69,8 +69,7 @@
 
 }
 
-	</style>
-  </head>
+</style>
   <body class="goto-here">
 		<div class="py-1 bg-primary">
     	<div class="container">
@@ -79,14 +78,11 @@
 		    		<div class="row d-flex">
 		    			<div class="col-md pr-4 d-flex topper align-items-center">
 					    	<div class="icon mr-2 d-flex justify-content-center align-items-center"><span class="icon-phone2"></span></div>
-						    <span class="text">+ 1235 2355 98</span>
+						    <span class="text">+91 8113841149</span>
 					    </div>
 					    <div class="col-md pr-4 d-flex topper align-items-center">
 					    	<div class="icon mr-2 d-flex justify-content-center align-items-center"><span class="icon-paper-plane"></span></div>
-						    <span class="text">youremail@email.com</span>
-					    </div>
-					    <div class="col-md-5 pr-4 d-flex topper align-items-center text-lg-right">
-						    <span class="text">3-5 Business days delivery &amp; Free Returns</span>
+						    <span class="text">ecohive100@gmail.com</span>
 					    </div>
 				    </div>
 			    </div>
@@ -111,18 +107,19 @@
 				{% endif %}
 			  <li class="nav-item active"><a href="{% url 'index' %}" class="nav-link">Home</a></li>
 			  <li class="nav-item dropdown">
-				<a class="nav-link dropdown-toggle" href="{% url 'shop' %}" id="dropdown04" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Shop</a>
+				<a class="nav-link dropdown-toggle" href="{% url 'shop' %}" id="dropdown04" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">About</a>
 				<div class="dropdown-menu" aria-labelledby="dropdown04">
-				  <a class="dropdown-item" href="{% url 'shop' %}">Shop</a>
-				  <a class="dropdown-item" href="{% url 'wishlist' %}">Wishlist</a>
-				  <a class="dropdown-item" href="{% url 'cart' %}">Cart</a>
-				  <a class="dropdown-item" href="{% url 'checkout' %}">Checkout</a>
+          <a class="dropdown-item" href="{% url 'about' %}">About</a>
+				  <a class="dropdown-item" href="#">Contact</a>
+				  {% comment %} <a class="dropdown-item" href="{% url 'wishlist' %}">Wishlist</a> {% endcomment %}
+				  <a class="dropdown-item" href="#">Blog</a>
+				  {% comment %} <a class="dropdown-item" href="{% url 'checkout' %}">Checkout</a> {% endcomment %}
 				</div>
 			  </li>
-			  <li class="nav-item"><a href="{% url 'about' %}" class="nav-link">About</a></li>
-			  <li class="nav-item"><a href="#" class="nav-link">Blog</a></li>
-			  <li class="nav-item"><a href="#" class="nav-link">Contact</a></li>
-			  <li class="nav-item cta cta-colored"><a href="cart.html" class="nav-link"><span class="icon-shopping_cart"></span>[0]</a></li>
+			  <li class="nav-item"><a href="#" class="nav-link">Wishlist</a></li>
+        <li class="nav-item"><a href="{% url 'shop' %}" class="nav-link">Shop</a></li>
+			  <li class="nav-item"><a href="{% url 'orders' %}" class="nav-link">Your Orders</a></li>
+			  <li class="nav-item cta cta-colored"><a href="{% url 'cart' %}" class="nav-link"><span class="icon-shopping_cart"></span>[0]</a></li>
 	  
 			  <!-- Added Login and Registration buttons -->
 			  {% if user.is_authenticated %}
@@ -156,17 +153,7 @@
 				{% else %}
 				<a href="{% url 'login' %}" class="nav-link" style="color:black; margin-top:13px;">Login</a>
 				<a href="{% url 'register' %}" class="nav-link" style="color:black;  margin-top:13px;">Register</a>
-			 {% comment %} </li>
-			<li class="nav-item dropdown">
-				<a href="#" class="nav-link dropdown-toggle" id="registerDropdown" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-					Register
-				</a>
-				<div class="dropdown-menu" aria-labelledby="registerDropdown"> {% endcomment %}
-					
-					{% comment %} <a class="dropdown-item" href="{% url 'customer_register' %}">Register as Customer</a> {% endcomment %}
-				{% comment %} </div> {% endcomment %}
     	{% endif %}
-			{% comment %} </li> {% endcomment %}
 			</ul>
 		  </div>
 		</div>
@@ -208,56 +195,59 @@
 								</button>
 							</span>
 							<input type="hidden" name="product_price" value="{{ product.product_price }}">
-							<input type="text" id="quantity" name="quantity" class="form-control input-number" value="1" min="1" max="100">
+							<input type="text" id="quantity" name="quantity" class="form-control input-number" value="1" min="1" max="100" >
 							<span class="input-group-btn ml-2">
 								<button type="submit" class="quantity-right-plus btn" data-type="plus" data-field="">
 									<i class="ion-ios-add"></i>
 								</button>
 							</span>
+
+						</div>
+						<div id="error-message" style="color: red; margin-left: 20px;"></div>
+						<div class="star-ratings">
+							<div class="star-rating">
+								<span class="filled-stars"></span>
+								<span class="empty-stars"></span>
+							</div>
 						</div>
 						{% if is_in_cart %}
 						<p style="margin-left:20px;"> Product is already in your cart </p>
-						<button type="submit" id="pay-btn" class="add-to-cart-button" >Buy Now</button><br><br>
+						<button type="submit" id="pay-btn" class="add-to-cart-button" name="buy_now">Buy Now</button><br><br>
 						<a href="{% url 'cart' %}" id="cartlink" >Go to Cart</a>
 						{% else %}
-						<button type="submit" class="add-to-cart-button" >Add to Cart</button><br><br>
-						<button type="submit" class="add-to-cart-button" >Buy Now</button>
+						<button type="submit" class="add-to-cart-button" name="buy_now" >Add to Cart</button><br><br>
+						<button type="submit" class="add-to-cart-button" name="buy_now">Buy Now</button>
 						{% endif %}
 					</form>
 				</div>
 			</div>
 		</div>
 	</section>
-	{% comment %} <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 	<script>
-	  var options = {
-		 
-		// Enter the Key ID generated from the Dashboard
-		key: "{{ razorpay_merchant_key }}",
-		 
-		// Amount is in currency subunits.
-		// Default currency is INR. Hence,
-		// 50000 refers to 50000 paise
-		amount: "{{ razorpay_amount }}",
-		currency: "{{ currency }}",
-		 
-		// Your/store name.
-		name: "Dj Razorpay",
-		 
-		// Pass the `id` obtained in the response of Step 1
-		order_id: "{{ razorpay_order_id }}",
-		callback_url: "{{ callback_url }}",
-	  };
-	   
-	  // initialise razorpay with the options.
-	  var rzp1 = new Razorpay(options);
-	   
-	  // add event listener to the payment button.
-	  document.getElementById("pay-btn").onclick = function (e) {
-		rzp1.open();
-		e.preventDefault();
-	  };
-	</script> {% endcomment %}
+		document.addEventListener("DOMContentLoaded", function () {
+			const quantityInput = document.getElementById("quantity");
+			const stock = {{ product.product_stock }}; // Accessing the value from the Django context
+	
+			console.log("Quantity Input:", quantityInput); // Debugging statement
+	
+			quantityInput.addEventListener("input", function () {
+				console.log("Input value:", quantityInput.value); // Debugging statement
+				const quantity = parseInt(quantityInput.value);
+				const errorMessage = document.getElementById("error-message");
+	
+				console.log("Stock:", stock); // Debugging statement
+	
+				if (quantity > stock) {
+					errorMessage.textContent = "Quantity exceeds available stock!";
+					document.querySelector("button[name='buy_now']").disabled = true;
+				} else {
+					errorMessage.textContent = "";
+					document.querySelector("button[name='buy_now']").disabled = false;
+				}
+			});
+		});
+	</script>
+	
     {% comment %} <section class="ftco-section">
     	<div class="container">
 				<div class="row justify-content-center mb-3 pb-3">

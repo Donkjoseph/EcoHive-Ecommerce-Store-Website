@@ -2,6 +2,8 @@
 {% load static %}
 {%block content%}
 
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
       <div class="container-fluid">
         <!--  Row 1 -->
         <div class="row">
@@ -23,6 +25,36 @@
                 </div>
                 <div id="chart"></div>
               </div>
+              <div class="mt-4">
+                <canvas id="orderChart"></canvas>
+            </div>
+            <script>
+                var ctx = document.getElementById('orderChart').getContext('2d');
+                var order_labels = {{ order_labels|safe }};
+                var order_data = {{ order_data|safe }};
+      
+                var orderChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: order_labels,
+                        datasets: [{
+                            label: 'Total Orders',
+                            data: order_data,
+                            backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                            borderColor: 'rgba(75, 192, 192, 1)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                stepSize: 1
+                            }
+                        }
+                    }
+                });
+            </script>
             </div>
           </div>
           <div class="col-lg-4">
@@ -75,8 +107,10 @@
                         <p>Total Number of Users: {{ total_users }}</p>
                         <p>Total Number of Products Added: {{ total_products }}</p>
                         <p>Total Number of Certified Users: {{ total_certified_users }}</p>
+                        <p>Total Number of Orders: {{ total_orders }}</p> <!-- Add this line -->
                       </div>
                     </div>
+                  </div>
                     <div class="col-4">
                     </div>
                   </div>

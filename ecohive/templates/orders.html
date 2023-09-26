@@ -1,50 +1,49 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <title>Vegefoods - Free Bootstrap 4 Template by Colorlib</title>
+  <head>
+    <title>EcoHive - Eco-friendly, organic essentials hub</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     
-    <!-- Include your CSS links -->
     <link href="https://fonts.googleapis.com/css?family=Poppins:200,300,400,500,600,700,800&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css?family=Lora:400,400i,700,700i&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css?family=Amatic+SC:400,700&display=swap" rel="stylesheet">
+
     <link rel="stylesheet" href="{% static 'css/open-iconic-bootstrap.min.css' %}">
     <link rel="stylesheet" href="{% static 'css/animate.css' %}">
+    
     <link rel="stylesheet" href="{% static 'css/owl.carousel.min.css' %}">
     <link rel="stylesheet" href="{% static 'css/owl.theme.default.min.css' %}">
     <link rel="stylesheet" href="{% static 'css/magnific-popup.css' %}">
+
     <link rel="stylesheet" href="{% static 'css/aos.css' %}">
+
     <link rel="stylesheet" href="{% static 'css/ionicons.min.css' %}">
+
     <link rel="stylesheet" href="{% static 'css/bootstrap-datepicker.css' %}">
-    <link rel="stylesheet" href="{% static 'css/jquery.timepicker.css' %}">
+    <link rel="stylesheet" href="css/jquery.timepicker.css">
+
+    
     <link rel="stylesheet" href="{% static 'css/flaticon.css' %}">
     <link rel="stylesheet" href="{% static 'css/icomoon.css' %}">
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    
-    <!-- Include your custom CSS styles -->
-    <style>
-        /* Add your custom styles here */
-    </style>
-</head>
-<body class="goto-here">
-    <div class="py-1 bg-primary">
+  </head>
+  <style>
+</style>
+  <body class="goto-here">
+		<div class="py-1 bg-primary">
     	<div class="container">
     		<div class="row no-gutters d-flex align-items-start align-items-center px-md-0">
 	    		<div class="col-lg-12 d-block">
 		    		<div class="row d-flex">
 		    			<div class="col-md pr-4 d-flex topper align-items-center">
 					    	<div class="icon mr-2 d-flex justify-content-center align-items-center"><span class="icon-phone2"></span></div>
-						    <span class="text">+ 1235 2355 98</span>
+						    <span class="text">+91 8113841149</span>
 					    </div>
 					    <div class="col-md pr-4 d-flex topper align-items-center">
 					    	<div class="icon mr-2 d-flex justify-content-center align-items-center"><span class="icon-paper-plane"></span></div>
-						    <span class="text">youremail@email.com</span>
-					    </div>
-					    <div class="col-md-5 pr-4 d-flex topper align-items-center text-lg-right">
-						    <span class="text">3-5 Business days delivery &amp; Free Returns</span>
+						    <span class="text">ecohive100@gmail.com</span>
 					    </div>
 				    </div>
 			    </div>
@@ -69,18 +68,19 @@
 				{% endif %}
 			  <li class="nav-item active"><a href="{% url 'index' %}" class="nav-link">Home</a></li>
 			  <li class="nav-item dropdown">
-				<a class="nav-link dropdown-toggle" href="{% url 'shop' %}" id="dropdown04" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Shop</a>
+				<a class="nav-link dropdown-toggle" href="{% url 'shop' %}" id="dropdown04" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">About</a>
 				<div class="dropdown-menu" aria-labelledby="dropdown04">
-				  <a class="dropdown-item" href="{% url 'shop' %}">Shop</a>
-				  <a class="dropdown-item" href="{% url 'wishlist' %}">Wishlist</a>
-				  <a class="dropdown-item" href="{% url 'cart' %}">Cart</a>
-				  <a class="dropdown-item" href="{% url 'checkout' %}">Checkout</a>
+          <a class="dropdown-item" href="{% url 'about' %}">About</a>
+				  <a class="dropdown-item" href="#">Contact</a>
+				  {% comment %} <a class="dropdown-item" href="{% url 'wishlist' %}">Wishlist</a> {% endcomment %}
+				  <a class="dropdown-item" href="#">Blog</a>
+				  {% comment %} <a class="dropdown-item" href="{% url 'checkout' %}">Checkout</a> {% endcomment %}
 				</div>
 			  </li>
-			  <li class="nav-item"><a href="{% url 'about' %}" class="nav-link">About</a></li>
-			  <li class="nav-item"><a href="#" class="nav-link">Blog</a></li>
-			  <li class="nav-item"><a href="#" class="nav-link">Contact</a></li>
-			  <li class="nav-item cta cta-colored"><a href="cart.html" class="nav-link"><span class="icon-shopping_cart"></span>[0]</a></li>
+			  <li class="nav-item"><a href="#" class="nav-link">Wishlist</a></li>
+        <li class="nav-item"><a href="{% url 'shop' %}" class="nav-link">Shop</a></li>
+			  <li class="nav-item"><a href="{% url 'orders' %}" class="nav-link">Your Orders</a></li>
+			  <li class="nav-item cta cta-colored"><a href="{% url 'cart' %}" class="nav-link"><span class="icon-shopping_cart"></span>[0]</a></li>
 	  
 			  <!-- Added Login and Registration buttons -->
 			  {% if user.is_authenticated %}
@@ -114,17 +114,7 @@
 				{% else %}
 				<a href="{% url 'login' %}" class="nav-link" style="color:black; margin-top:13px;">Login</a>
 				<a href="{% url 'register' %}" class="nav-link" style="color:black;  margin-top:13px;">Register</a>
-			 {% comment %} </li>
-			<li class="nav-item dropdown">
-				<a href="#" class="nav-link dropdown-toggle" id="registerDropdown" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-					Register
-				</a>
-				<div class="dropdown-menu" aria-labelledby="registerDropdown"> {% endcomment %}
-					
-					{% comment %} <a class="dropdown-item" href="{% url 'customer_register' %}">Register as Customer</a> {% endcomment %}
-				{% comment %} </div> {% endcomment %}
     	{% endif %}
-			{% comment %} </li> {% endcomment %}
 			</ul>
 		  </div>
 		</div>
@@ -144,47 +134,103 @@
 
     <!-- Add a section for displaying order details -->
     <section class="ftco-section ftco-cart">
-        <div class="container">
-            <div class="row">
-                <div class="col-md-12 ftco-animate">
-                    <div class="cart-list">
-                        <h2>Order Details</h2>
-                        <table class="table">
-                            <thead class="thead-primary">
-                                <tr class="text-center">
-                                    <th>Order ID</th>
-                                    <th>Order Date</th> <!-- Added the Order Date column -->
-                                    <th>Product Name</th>
-                                    <th>Price</th>
-                                    <th>Quantity</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for order in orders %}
-                                {% for order_item in order.order_items.all %}
-                                <tr class="text-center">
-                                    <td>{{ order.id }}</td>
-                                    <td>{{ order.order_date|date:"F j, Y H:i" }}</td> <!-- Display the order date -->
-                                    <td>{{ order_item.product.product_name }}</td>
-                                    <td>RS {{ order_item.product.product_price }}</td>
-                                    <td>{{ order_item.quantity }}</td>
-                                </tr>
-                                {% endfor %}
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                    <!-- Display the total price for each order -->
-                    {% for order in orders %}
-                    <div class="cart-total" style="text-align: center;">
-                        <h6>Total Paid Amount is : RS {{ order.total_price|floatformat:2 }}</h6>
-                    </div>
-                    {% endfor %}
-                </div>
-            </div>
-        </div>
-    </section>
-
+      <div class="container">
+          <div class="row">
+              <div class="col-md-12 ftco-animate">
+                  <div class="cart-list">
+                      <h2>Order Details</h2>
+                      <table class="table">
+                          <thead class="thead-primary">
+                              <tr class="text-center">
+                                  <th>Order ID</th>
+                                  <th>Order Date</th>
+                                  <th>Product Name</th>
+                                  <th>Image</th>
+                                  <th>Price</th>
+                                  <th>Status</th>
+                                  <th>Total Paid Amount</th>
+                              </tr>
+                          </thead>
+                          <tbody>
+                              {% for order in orders %}
+                                  {% with order.products.all as order_items %}
+                                      {% for order_item in order_items %}
+                                          <tr class="text-center">
+                                              {% if forloop.first %}
+                                                  <td rowspan="{{ order_items|length }}">{{ order.id }}</td>
+                                                  <td rowspan="{{ order_items|length }}">{{ order.order_date|date:"F j, Y H:i" }}</td>
+                                              {% endif %}
+                                              <td>{{ order_item.product_name }}</td>
+                                              <td>
+                                                  {% if order_item.product_image %}
+                                                      <img src="{{ order_item.product_image.url }}" alt="{{ order_item.product_name }}" width="100">
+                                                  {% else %}
+                                                      No image available
+                                                  {% endif %}
+                                              </td>
+                                              <td>RS {{ order_item.product_price }}</td>
+                                              {% if forloop.first %}
+                                                  <td rowspan="{{ order_items|length }}" class="status-{{ order.payment_status }}">{{ order.get_payment_status_display }}</td>
+                                                  <td rowspan="{{ order_items|length }}">RS {{ order.total_price|floatformat:2 }}</td>
+                                              {% endif %}
+                                          </tr>
+                                      {% endfor %}
+                                  {% endwith %}
+                              {% endfor %}
+                          </tbody>
+                      </table>
+                  </div>
+              </div>
+          </div>
+      </div>
+  </section>
+  <style>
+    /* Add your custom CSS styles here */
+    body {
+        background-color: #f7f7f7;
+        font-family: Arial, sans-serif;
+    }
+    h2 {
+        color: #333;
+    }
+    table {
+        width: 150%;
+        border-collapse: collapse;
+        margin-top: 20px;
+    }
+    th, td {
+        padding: 10px;
+        text-align: center;
+    }
+    th {
+        background-color: #333;
+        color: #fff;
+    }
+    tr:nth-child(even) {
+        background-color: #f2f2f2;
+    }
+    .status-pending {
+        color: #FF5733; /* Red for Pending status */
+    }
+    .status-successful {
+        color: #4CAF50; /* Green for Successful status */
+    }
+    .status-failed {
+        color: #FFC300; /* Yellow for Failed status */
+    }
+    .cart-total {
+        text-align: center;
+        margin-top: 20px;
+    }
+    .cart-total h6 {
+        color: #333;
+    }
+    /* Target the container within the .ftco-section.ftco-cart */
+.ftco-section.ftco-cart .container {
+    max-width: 1200px; /* Set your desired maximum width */
+    margin: 0 auto; /* Center the container */
+}
+</style>
     <!-- Include your footer here (similar to your cart page) -->
     <footer class="ftco-footer ftco-section">
         <!-- ... Footer content ... -->

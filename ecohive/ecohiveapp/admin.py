@@ -68,7 +68,7 @@ class CartAdmin(admin.ModelAdmin):
 
 admin.site.register(Cart, CartAdmin)
 
-from .models import Payment, BillingDetails, Order, OrderItem
+from .models import Payment, BillingDetails
 @admin.register(Payment)
 class PaymentAdmin(admin.ModelAdmin):
     list_display = ('user', 'order_id', 'amount', 'currency', 'payment_status', 'payment_date')
@@ -80,16 +80,12 @@ class BillingDetailsAdmin(admin.ModelAdmin):
     list_display = ('user', 'first_name', 'last_name', 'email', 'phone')
     search_fields = ('user__username', 'email')
 
-class OrderItemInline(admin.TabularInline):
-    model = OrderItem
-    extra = 1  
+from .models import Order
+
 @admin.register(Order)
 class OrderAdmin(admin.ModelAdmin):
-    list_display = ('user', 'order_date', 'total_price')
-    list_filter = ('order_date',)
-    inlines = [OrderItemInline]
+    list_display = ('user', 'total_price', 'order_date', 'payment_status')
+    list_filter = ('payment_status', 'order_date')
+    search_fields = ('user__username', 'razorpay_order_id')
+    readonly_fields = ('razorpay_order_id',)  # If you want to make razorpay_order_id read-only in the admin
 
-@admin.register(OrderItem)
-class OrderItemAdmin(admin.ModelAdmin):
-    list_display = ('order', 'product', 'quantity')
-    list_filter = ('order__order_date',)  # Filter by the order's date

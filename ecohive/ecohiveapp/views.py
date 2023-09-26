@@ -170,9 +170,11 @@ def check_username(request):
     exists = User.objects.filter(username=username).exists()
     return JsonResponse({'exists': exists})
 
+import json
+
 @login_required
 def admindash(request):
-        # Calculate the total number of users
+    # Calculate the total number of users
     total_users = User.objects.count()
 
     # Calculate the number of products added
@@ -181,10 +183,20 @@ def admindash(request):
     # Calculate the number of certified users
     total_certified_users = Certification.objects.filter(is_approved='approved').count()
 
+    # Calculate the total number of orders
+    total_orders = Order.objects.count()
+
+    # Prepare data for the chart
+    order_labels = ['Total Orders']
+    order_data = [total_orders]
+
     context = {
         'total_users': total_users,
         'total_products': total_products,
         'total_certified_users': total_certified_users,
+        'total_orders': total_orders,
+        'order_labels': json.dumps(order_labels),  # Convert to JSON format for JavaScript
+        'order_data': json.dumps(order_data),      # Convert to JSON format for JavaScript
     }
     return render(request, 'admindash/admindash.html', context)
 
@@ -594,6 +606,12 @@ def product_single(request, product_id):
     existing_cart_item = Cart.objects.filter(user=user, product=product).first()
     is_in_cart = existing_cart_item is not None
 
+    # Include the product stock in the context
+    context = {
+        'product': product,
+        'is_in_cart': is_in_cart,
+        'product_stock': product.product_stock,  # Pass the product stock to the template
+    }
 
     if request.method == 'POST':
         # If it's a POST request, get the quantity from the form
@@ -609,8 +627,9 @@ def product_single(request, product_id):
             existing_cart_item.save()
 
         return redirect('cart')  # Redirect to the cart page or any other page you prefer
-        
-    return render(request, 'product-single.html', {'product': product, 'is_in_cart': is_in_cart})
+
+    return render(request, 'product-single.html', context)
+
 
 
 def remove_from_cart(request, cart_item_id):
@@ -692,7 +711,7 @@ def cart_view(request):
 
     return render(request, 'cart.html', context)
 
-from .models import BillingDetails, Order, Cart, OrderItem  # Import your models here
+from .models import BillingDetails, Cart, Order  # Import your models here
 from django.shortcuts import render, redirect
 from decimal import Decimal
 
@@ -702,35 +721,42 @@ from django.db import transaction
 def checkout(request):
     total_price = 0  # Initialize total_price outside the if block
     cart_items = Cart.objects.filter(user=request.user)  # Define cart_items here
+    billing_details = None  # Initialize billing_details to None
+
+    # Check if billing details exist for the user
+    if BillingDetails.objects.filter(user=request.user).exists():
+        billing_details = BillingDetails.objects.get(user=request.user)
 
     if request.method == 'POST' and 'place_order' in request.POST:
-        # Retrieve form data for billing details
-        first_name = request.POST.get('firstname')
-        last_name = request.POST.get('lastname')
-        state = request.POST.get('state')
-        street_address = request.POST.get('streetaddress')
-        apartment_suite_unit = request.POST.get('apartmentsuiteunit')
-        town_city = request.POST.get('towncity')
-        postcode_zip = request.POST.get('postcodezip')
-        phone = request.POST.get('phone')
-        email = request.POST.get('emailaddress')
+        # If billing details already exist, you can skip processing the form and just calculate the total price
+        if not billing_details:
+            # Retrieve and process the form data for billing details
+            first_name = request.POST.get('firstname')
+            last_name = request.POST.get('lastname')
+            state = request.POST.get('state')
+            street_address = request.POST.get('streetaddress')
+            apartment_suite_unit = request.POST.get('apartmentsuiteunit')
+            town_city = request.POST.get('towncity')
+            postcode_zip = request.POST.get('postcodezip')
+            phone = request.POST.get('phone')
+            email = request.POST.get('emailaddress')
 
-        # Create BillingDetails object (assuming BillingDetails is a separate model)
-        billing_details = BillingDetails(
-            user=request.user,  # Replace with the authenticated user or user session data
-            first_name=first_name,
-            last_name=last_name,
-            state=state,
-            street_address=street_address,
-            apartment_suite_unit=apartment_suite_unit,
-            town_city=town_city,
-            postcode_zip=postcode_zip,
-            phone=phone,
-            email=email,
-        )
-        billing_details.save()
+            # Create BillingDetails object (assuming BillingDetails is a separate model)
+            billing_details = BillingDetails(
+                user=request.user,
+                first_name=first_name,
+                last_name=last_name,
+                state=state,
+                street_address=street_address,
+                apartment_suite_unit=apartment_suite_unit,
+                town_city=town_city,
+                postcode_zip=postcode_zip,
+                phone=phone,
+                email=email,
+            )
+            billing_details.save()
 
-        total_price = sum(item.product.product_price * item.quantity for item in cart_items)  # Calculate total_price here
+        total_price = sum(item.product.product_price * item.quantity for item in cart_items)
 
         # Convert total_price to a float before storing it in the session
         request.session['order_total'] = float(total_price)
@@ -739,15 +765,18 @@ def checkout(request):
         return redirect('payment')
 
     # If it's not a POST request or not a place order request, continue displaying the cart items
-    total_price = sum(item.product.product_price * item.quantity for item in cart_items)  # Calculate total_price here
+    total_price = sum(item.product.product_price * item.quantity for item in cart_items)
 
     # Convert total_price to a float before passing it to the template
     context = {
         'cart_items': cart_items,
         'total_price': float(total_price),
+        'billing_details': billing_details,  # Pass billing_details to the template
     }
 
     return render(request, 'checkout.html', context)
+
+
 #payment
 from django.shortcuts import render
 import razorpay
@@ -757,136 +786,131 @@ from django.http import HttpResponseBadRequest
 
 razorpay_client = razorpay.Client(
     auth=(settings.RAZOR_KEY_ID, settings.RAZOR_KEY_SECRET))
- 
-@csrf_exempt
-def paymenthandler(request):
- 
-    # only accept POST request.
-    if request.method == "POST":
-        try:
-           
-            # get the required parameters from post request.
-            payment_id = request.POST.get('razorpay_payment_id', '')
-            razorpay_order_id = request.POST.get('razorpay_order_id', '')
-            signature = request.POST.get('razorpay_signature', '')
-            params_dict = {
-                'razorpay_order_id': razorpay_order_id,
-                'razorpay_payment_id': payment_id,
-                'razorpay_signature': signature
-            }
- 
-            # verify the payment signature.
-            result = razorpay_client.utility.verify_payment_signature(
-                params_dict)
-            if result is not None:
-                amount = 20000  # Rs. 200
-                try:
- 
-                    # capture the payemt
-                    razorpay_client.payment.capture(payment_id, amount)
- 
-                    # render success page on successful caputre of payment
-                    return render(request, 'payment.html')
-                except:
- 
-                    # if there is an error while capturing payment.
-                    return render(request, 'paymentsuccess.html')
-            else:
- 
-                # if signature verification fails.
-                return render(request, 'paymentsuccess.html')
-        except:
- 
-            # if we don't find the required parameters in POST data
-            return HttpResponseBadRequest()
-    else:
-       # if other than POST request is made.
-        return HttpResponseBadRequest()
-
 
 def payment(request):
-    if request.method == 'POST':
-        # Retrieve the total price from the session
-        total_price = request.session.get('order_total')
-
-        if total_price is not None:
-            # Create an Order object
-            order = Order(
-                user=request.user,  # Replace with the authenticated user or user session data
-                total_price=total_price,
-                # Add other order details as needed
-            )
-            order.save()
-
-            # Retrieve the cart items for the user
-            cart_items = Cart.objects.filter(user=request.user)
-
-            # Create OrderItem objects and associate them with the order
-            for cart_item in cart_items:
-                order_item = OrderItem(
-                    order=order,
-                    product=cart_item.product,
-                    quantity=cart_item.quantity,
-                )
-                order_item.save()
-
-            # Remove the stored total price from the session
-            del request.session['order_total']
-
-            # Remove cart items associated with the user
-            cart_items.delete()
-            request.session['order_total'] = float(total_price)
-
-            # You can also send an order confirmation email or perform other actions here
-            # Redirect to a thank you page or order confirmation page
-            return redirect('payment_confirm')
-
-    # If it's not a POST request or if the payment hasn't been completed yet, you can render the payment page
-    cart_items = Cart.objects.filter(user=request.user)  # Retrieve the list of products in the cart
-    total_price = request.session.get('order_total', 0)  # Default to 0 if 'order_total' is not in the session
-
-
-    context = {
-        'cart_items': cart_items,
-        'total_price': total_price,  # Include total_price in the context
-    }
-
-    return render(request, 'payment.html', context)
-
-@login_required
-def payment_confirm(request):
-    total_price = request.session.get('order_total')
-
-    # Razorpay integration code goes here
+    cart_items = Cart.objects.filter(user=request.user)
+    total_price = Decimal(sum(cart_item.product.product_price * cart_item.quantity for cart_item in cart_items))
+    
     currency = 'INR'
-    amount = int(total_price * 100)  # Convert total_price to paisa (assuming price is in rupees)
+
+    # Set the 'amount' variable to 'total_price'
+    amount = int(total_price*100)
+    # amount=20000
 
     # Create a Razorpay Order
-    razorpay_order = razorpay_client.order.create(
-        dict(amount=amount, currency=currency, payment_capture='0')
+    razorpay_order = razorpay_client.order.create(dict(
+        amount=amount,
+        currency=currency,
+        payment_capture='0'
+    ))
+
+    # Order id of the newly created order
+    razorpay_order_id = razorpay_order['id']
+    callback_url = '/paymenthandler/'
+
+    order = Order.objects.create(
+        user=request.user,
+        total_price=total_price,
+        razorpay_order_id=razorpay_order_id,
+        payment_status=Order.PaymentStatusChoices.PENDING,
     )
 
-    # Extract the order id of the newly created order
-    razorpay_order_id = razorpay_order['id']
+    # Add the products to the order
+    for cart_item in cart_items:
+        order.products.add(cart_item.product)
 
-    # Define the callback URL
-    callback_url = '/paymenthandler/'  # Update this URL to your actual payment handler
+    # Save the order to generate an order ID
+    order.save()
 
-    # Pass these details to the frontend
+    # Create a context dictionary with all the variables you want to pass to the template
     context = {
+        'cart_items': cart_items,
         'total_price': total_price,
         'razorpay_order_id': razorpay_order_id,
         'razorpay_merchant_key': settings.RAZOR_KEY_ID,
-        'razorpay_amount': amount,
+        'razorpay_amount': amount,  # Set to 'total_price'
         'currency': currency,
         'callback_url': callback_url,
     }
 
-    return render(request, 'payment_confirm.html', context)
+    return render(request, 'payment.html', context=context)
+
+@csrf_exempt
+def paymenthandler(request):
+    if request.method == "POST":
+        payment_id = request.POST.get('razorpay_payment_id', '')
+        razorpay_order_id = request.POST.get('razorpay_order_id', '')
+        signature = request.POST.get('razorpay_signature', '')
+
+        # Verify the payment signature.
+        params_dict = {
+            'razorpay_order_id': razorpay_order_id,
+            'razorpay_payment_id': payment_id,
+            'razorpay_signature': signature
+        }
+        result = razorpay_client.utility.verify_payment_signature(params_dict)
+
+        if not result:
+            # Signature verification failed.
+            return render(request, 'paymentfail.html')
+
+        # Signature verification succeeded.
+        # Retrieve the order from the database
+        try:
+            order = Order.objects.get(razorpay_order_id=razorpay_order_id)
+        except Order.DoesNotExist:
+            return HttpResponseBadRequest("Order not found")
+
+        if order.payment_status == Order.PaymentStatusChoices.SUCCESSFUL:
+            # Payment is already marked as successful, ignore this request.
+            return HttpResponse("Payment is already successful")
+
+        if order.payment_status != Order.PaymentStatusChoices.PENDING:
+            # Order is not in a pending state, do not proceed with stock update.
+            return HttpResponseBadRequest("Invalid order status")
+
+        # Capture the payment amount
+        amount = int(order.total_price * 100)  # Convert Decimal to paise
+        razorpay_client.payment.capture(payment_id, amount)
+
+        # Update the order with payment ID and change status to "Successful"
+        order.payment_id = payment_id
+        order.payment_status = Order.PaymentStatusChoices.SUCCESSFUL
+        order.save()
+
+        # Remove the products from the cart and update stock
+        cart_items = Cart.objects.filter(user=request.user)
+        for cart_item in cart_items:
+            product = cart_item.product
+            if product.product_stock >= cart_item.quantity:
+                # Decrease the product stock and update ProductSummary
+                product.product_stock -= cart_item.quantity
+                product.save()
+                summary, created = ProductSummary.objects.get_or_create(product_name=product.product_name)
+                summary.update_total_stock()
+                # Remove the item from the cart
+                cart_item.delete()
+            else:
+                # Handle insufficient stock, you can redirect or show an error message
+                return HttpResponseBadRequest("Insufficient stock for some items")
+
+        # Redirect to a payment success page
+        return redirect('orders')
+
+    return HttpResponseBadRequest("Invalid request method")
+
 
 @login_required
 def orders(request):
-    # Retrieve a list of orders for the current user
     orders = Order.objects.filter(user=request.user)
-    
-    return render(request, 'orders.html', {'orders': orders})
+
+    context = {
+        'orders': orders,
+    }
+
+    return render(request, 'orders.html', context)
+
+def view_orders(request):
+    all_orders = Order.objects.all()
+
+    return render(request, 'admindash/view_orders.html', {'all_orders': all_orders})

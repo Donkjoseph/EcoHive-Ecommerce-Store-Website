@@ -5,6 +5,7 @@ from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from django.utils import timezone
 
 
 
@@ -112,15 +113,7 @@ class Product(models.Model):
         # After saving the product, update the ProductSummary
         summary, created = ProductSummary.objects.get_or_create(product_name=self.product_name)
         summary.update_total_stock()
-    # def clean(self):
-    #     # Check if a product with the same name already exists for the same seller
-    #     existing_product = Product.objects.filter(
-    #         product_name=self.product_name,
-    #         category=self.category,
-    #         seller=self.seller
-    #     ).exclude(pk=self.pk)
-    #     if existing_product.exists():
-    #         raise ValidationError("You have already added a product with this name in the selected category.")
+    
 
 from django.db.models import Sum
 from django.db.models.signals import post_save, post_delete
@@ -196,15 +189,29 @@ class BillingDetails(models.Model):
 
     def __str__(self):
         return f"{self.first_name} {self.last_name}'s Billing Details"
-class OrderItem(models.Model):
-    order = models.ForeignKey('Order', related_name='order_items', on_delete=models.CASCADE)
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
-    quantity = models.PositiveIntegerField(default=1)  # Add a quantity field
+
 
 class Order(models.Model):
+    class PaymentStatusChoices(models.TextChoices):
+        PENDING = 'pending', 'Pending'
+        SUCCESSFUL = 'successful', 'Successful'
+        FAILED = 'failed', 'Failed'
+
     user = models.ForeignKey(User, on_delete=models.CASCADE)
+    products = models.ManyToManyField(Product)  # Assuming you have a Product model
+    total_price = models.DecimalField(max_digits=10, decimal_places=2)
     order_date = models.DateTimeField(auto_now_add=True)
-    total_price = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    razorpay_order_id = models.CharField(max_length=255, default=None)
+    payment_status = models.CharField(
+        max_length=20, choices=PaymentStatusChoices.choices, default=PaymentStatusChoices.PENDING)
+    def _str_(self):
+        return self.user.username 
+
+class Review(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)  # Replace Product with your product model
+    rating = models.PositiveIntegerField(choices=[(1, '1 Star'), (2, '2 Stars'), (3, '3 Stars'), (4, '4 Stars'), (5, '5 Stars')])
+    review_text = models.TextField()
 
     def __str__(self):
-        return f"Order by {self.user.username} on {self.order_date}"
+        return f"Review by {self.user.username} for {self.product.product_name}"

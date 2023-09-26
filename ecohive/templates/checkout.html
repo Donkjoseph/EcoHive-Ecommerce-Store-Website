@@ -2,7 +2,7 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <title>Vegefoods - Free Bootstrap 4 Template by Colorlib</title>
+    <title>EcoHive - Eco-friendly, organic essentials hub</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     
@@ -29,6 +29,8 @@
     <link rel="stylesheet" href="{% static 'css/icomoon.css' %}">
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
   </head>
+  <style>
+</style>
   <body class="goto-here">
 		<div class="py-1 bg-primary">
     	<div class="container">
@@ -37,14 +39,11 @@
 		    		<div class="row d-flex">
 		    			<div class="col-md pr-4 d-flex topper align-items-center">
 					    	<div class="icon mr-2 d-flex justify-content-center align-items-center"><span class="icon-phone2"></span></div>
-						    <span class="text">+ 1235 2355 98</span>
+						    <span class="text">+91 8113841149</span>
 					    </div>
 					    <div class="col-md pr-4 d-flex topper align-items-center">
 					    	<div class="icon mr-2 d-flex justify-content-center align-items-center"><span class="icon-paper-plane"></span></div>
-						    <span class="text">youremail@email.com</span>
-					    </div>
-					    <div class="col-md-5 pr-4 d-flex topper align-items-center text-lg-right">
-						    <span class="text">3-5 Business days delivery &amp; Free Returns</span>
+						    <span class="text">ecohive100@gmail.com</span>
 					    </div>
 				    </div>
 			    </div>
@@ -69,18 +68,19 @@
 				{% endif %}
 			  <li class="nav-item active"><a href="{% url 'index' %}" class="nav-link">Home</a></li>
 			  <li class="nav-item dropdown">
-				<a class="nav-link dropdown-toggle" href="{% url 'shop' %}" id="dropdown04" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Shop</a>
+				<a class="nav-link dropdown-toggle" href="{% url 'shop' %}" id="dropdown04" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">About</a>
 				<div class="dropdown-menu" aria-labelledby="dropdown04">
-				  <a class="dropdown-item" href="{% url 'shop' %}">Shop</a>
-				  <a class="dropdown-item" href="{% url 'wishlist' %}">Wishlist</a>
-				  <a class="dropdown-item" href="{% url 'cart' %}">Cart</a>
-				  <a class="dropdown-item" href="{% url 'checkout' %}">Checkout</a>
+          <a class="dropdown-item" href="{% url 'about' %}">About</a>
+				  <a class="dropdown-item" href="#">Contact</a>
+				  {% comment %} <a class="dropdown-item" href="{% url 'wishlist' %}">Wishlist</a> {% endcomment %}
+				  <a class="dropdown-item" href="#">Blog</a>
+				  {% comment %} <a class="dropdown-item" href="{% url 'checkout' %}">Checkout</a> {% endcomment %}
 				</div>
 			  </li>
-			  <li class="nav-item"><a href="{% url 'about' %}" class="nav-link">About</a></li>
-			  <li class="nav-item"><a href="#" class="nav-link">Blog</a></li>
-			  <li class="nav-item"><a href="#" class="nav-link">Contact</a></li>
-			  <li class="nav-item cta cta-colored"><a href="cart.html" class="nav-link"><span class="icon-shopping_cart"></span>[0]</a></li>
+			  <li class="nav-item"><a href="#" class="nav-link">Wishlist</a></li>
+        <li class="nav-item"><a href="{% url 'shop' %}" class="nav-link">Shop</a></li>
+			  <li class="nav-item"><a href="{% url 'orders' %}" class="nav-link">Your Orders</a></li>
+			  <li class="nav-item cta cta-colored"><a href="{% url 'cart' %}" class="nav-link"><span class="icon-shopping_cart"></span>[0]</a></li>
 	  
 			  <!-- Added Login and Registration buttons -->
 			  {% if user.is_authenticated %}
@@ -114,17 +114,7 @@
 				{% else %}
 				<a href="{% url 'login' %}" class="nav-link" style="color:black; margin-top:13px;">Login</a>
 				<a href="{% url 'register' %}" class="nav-link" style="color:black;  margin-top:13px;">Register</a>
-			 {% comment %} </li>
-			<li class="nav-item dropdown">
-				<a href="#" class="nav-link dropdown-toggle" id="registerDropdown" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-					Register
-				</a>
-				<div class="dropdown-menu" aria-labelledby="registerDropdown"> {% endcomment %}
-					
-					{% comment %} <a class="dropdown-item" href="{% url 'customer_register' %}">Register as Customer</a> {% endcomment %}
-				{% comment %} </div> {% endcomment %}
     	{% endif %}
-			{% comment %} </li> {% endcomment %}
 			</ul>
 		  </div>
 		</div>
@@ -146,99 +136,100 @@
         <div class="container">
             <div class="row justify-content-center">
                 <div class="col-xl-7 ftco-animate">
-                    <form  method="post" class="billing-form">
-                        {% csrf_token %}
-                        <h3 class="mb-4 billing-heading">Billing Details</h3>
-                        <div class="row align-items-end">
-                            <!-- First Name -->
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label for="firstname">First Name</label>
-                                    <input type="text" id="firstname" name="firstname" placeholder="First Name" class="form-control">
-                                </div>
+                  <form method="post" class="billing-form">
+                    {% csrf_token %}
+                    <h3 class="mb-4 billing-heading">Billing Details</h3>
+                    <div class="row align-items-end">
+                        <!-- First Name -->
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="firstname">First Name</label>
+                                <input type="text" id="firstname" name="firstname" placeholder="First Name" class="form-control" value="{{ billing_details.first_name }}">
                             </div>
-                            <!-- Last Name -->
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label for="lastname">Last Name</label>
-                                    <input type="text" id="lastname" name="lastname" placeholder="Last Name" class="form-control">
-                                </div>
-                            </div>
-                            <!-- State -->
-                            <div class="w-100"></div>
-                            <div class="col-md-12">
-                                <div class="form-group">
-                                    <label for="state">State</label>
-                                    <div class="select-wrap">
-                                        <div class="icon"><span class="ion-ios-arrow-down"></span></div>
-										<select id="state" name="state" class="form-control">
-											<option value="Thiruvananthapuram">Thiruvananthapuram</option>
-											<option value="Kochi">Kochi</option>
-											<option value="Kozhikode">Kozhikode</option>
-											<option value="Thrissur">Thrissur</option>
-											<option value="Kollam">Kollam</option>
-											<option value="Alappuzha">Alappuzha</option>
-											<option value="Palakkad">Palakkad</option>
-											<option value="Kannur">Kannur</option>
-											<option value="Kottayam">Kottayam</option>
-											<option value="Malappuram">Malappuram</option>
-											<option value="Pathanamthitta">Pathanamthitta</option>
-											<option value="Idukki">Idukki</option>
-											<option value="Wayanad">Wayanad</option>
-											<!-- Add more options for other districts in Kerala -->
-										</select>
-                                    </div>
-                                </div>
-                            </div>
-                            <!-- Street Address -->
-                            <div class="w-100"></div>
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label for="streetaddress">Street Address</label>
-                                    <input type="text" id="streetaddress" name="streetaddress" class="form-control" placeholder="House number and street name">
-                                </div>
-                            </div>
-                            <!-- Apartment, Suite, Unit (optional) -->
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label for="apartmentsuiteunit">Apartment, Suite, Unit (optional)</label>
-                                    <input type="text" id="apartmentsuiteunit" name="apartmentsuiteunit" class="form-control" placeholder="Apartment, suite, unit, etc. (optional)">
-                                </div>
-                            </div>
-                            <!-- Town / City -->
-                            <div class="w-100"></div>
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label for="towncity">Town / City</label>
-                                    <input type="text" id="towncity" name="towncity" class="form-control" placeholder="Town or City">
-                                </div>
-                            </div>
-                            <!-- Postcode / ZIP -->
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label for="postcodezip">Postcode / ZIP *</label>
-                                    <input type="text" id="postcodezip" name="postcodezip" class="form-control" placeholder="Postcode or ZIP">
-                                </div>
-                            </div>
-                            <!-- Phone -->
-                            <div class="w-100"></div>
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label for="phone">Phone</label>
-                                    <input type="text" id="phone" name="phone" class="form-control" placeholder="Phone">
-                                </div>
-                            </div>
-                            <!-- Email Address -->
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label for="emailaddress">Email Address</label>
-                                    <input type="text" id="emailaddress" name="emailaddress" class="form-control" placeholder="Email Address">
-                                </div>
-                            </div>
-                            <div class="w-100"></div>
                         </div>
-                        <p><button type="submit" class="btn btn-primary py-3 px-4" name="place_order">Proceed to Payment</button></p>
-                    </form>
+                        <!-- Last Name -->
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="lastname">Last Name</label>
+                                <input type="text" id="lastname" name="lastname" placeholder="Last Name" class="form-control" value="{{ billing_details.last_name }}">
+                            </div>
+                        </div>
+                        <!-- State -->
+                        <div class="w-100"></div>
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label for="state">State</label>
+                                <div class="select-wrap">
+                                    <div class="icon"><span class="ion-ios-arrow-down"></span></div>
+                                    <select id="state" name="state" value="{{ billing_details.state }}" class="form-control">
+                                      <option value="Thiruvananthapuram">Thiruvananthapuram</option>
+                                      <option value="Kochi">Kochi</option>
+                                      <option value="Kozhikode">Kozhikode</option>
+                                      <option value="Thrissur">Thrissur</option>
+                                      <option value="Kollam">Kollam</option>
+                                      <option value="Alappuzha">Alappuzha</option>
+                                      <option value="Palakkad">Palakkad</option>
+                                      <option value="Kannur">Kannur</option>
+                                      <option value="Kottayam">Kottayam</option>
+                                      <option value="Malappuram">Malappuram</option>
+                                      <option value="Pathanamthitta">Pathanamthitta</option>
+                                      <option value="Idukki">Idukki</option>
+                                      <option value="Wayanad">Wayanad</option>
+                                        <!-- Add more options for other cities/states -->
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Street Address -->
+                        <div class="w-100"></div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="streetaddress">Street Address</label>
+                                <input type="text" id="streetaddress" name="streetaddress" class="form-control" placeholder="House number and street name" value="{{ billing_details.street_address }}">
+                            </div>
+                        </div>
+                        <!-- Apartment, Suite, Unit (optional) -->
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="apartmentsuiteunit">Apartment, Suite, Unit (optional)</label>
+                                <input type="text" id="apartmentsuiteunit" name="apartmentsuiteunit" class="form-control" placeholder="Apartment, suite, unit, etc. (optional)" value="{{ billing_details.apartment_suite_unit }}">
+                            </div>
+                        </div>
+                        <!-- Town / City -->
+                        <div class="w-100"></div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="towncity">Town / City</label>
+                                <input type="text" id="towncity" name="towncity" class="form-control" placeholder="Town or City" value="{{ billing_details.town_city }}">
+                            </div>
+                        </div>
+                        <!-- Postcode / ZIP -->
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="postcodezip">Postcode / ZIP *</label>
+                                <input type="text" id="postcodezip" name="postcodezip" class="form-control" placeholder="Postcode or ZIP" value="{{ billing_details.postcode_zip }}">
+                            </div>
+                        </div>
+                        <!-- Phone -->
+                        <div class="w-100"></div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="phone">Phone</label>
+                                <input type="text" id="phone" name="phone" class="form-control" placeholder="Phone" value="{{ billing_details.phone }}">
+                            </div>
+                        </div>
+                        <!-- Email Address -->
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="emailaddress">Email Address</label>
+                                <input type="text" id="emailaddress" name="emailaddress" class="form-control" placeholder="Email Address" value="{{ billing_details.email }}">
+                            </div>
+                        </div>
+                        <div class="w-100"></div>
+                    </div>
+                    <p><button type="submit" class="btn btn-primary py-3 px-4" name="place_order">Proceed to Payment</button></p>
+                </form>
+                
                     <!-- END -->
                 </div>
                 <div class="col-xl-5">

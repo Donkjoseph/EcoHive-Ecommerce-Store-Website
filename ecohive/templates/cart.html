@@ -2,7 +2,7 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <title>Vegefoods - Free Bootstrap 4 Template by Colorlib</title>
+    <title>EcoHive - Eco-friendly, organic essentials hub</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     
@@ -82,14 +82,11 @@
 		    		<div class="row d-flex">
 		    			<div class="col-md pr-4 d-flex topper align-items-center">
 					    	<div class="icon mr-2 d-flex justify-content-center align-items-center"><span class="icon-phone2"></span></div>
-						    <span class="text">+ 1235 2355 98</span>
+						    <span class="text">+91 8113841149</span>
 					    </div>
 					    <div class="col-md pr-4 d-flex topper align-items-center">
 					    	<div class="icon mr-2 d-flex justify-content-center align-items-center"><span class="icon-paper-plane"></span></div>
-						    <span class="text">youremail@email.com</span>
-					    </div>
-					    <div class="col-md-5 pr-4 d-flex topper align-items-center text-lg-right">
-						    <span class="text">3-5 Business days delivery &amp; Free Returns</span>
+						    <span class="text">ecohive100@gmail.com</span>
 					    </div>
 				    </div>
 			    </div>
@@ -114,18 +111,19 @@
 				{% endif %}
 			  <li class="nav-item active"><a href="{% url 'index' %}" class="nav-link">Home</a></li>
 			  <li class="nav-item dropdown">
-				<a class="nav-link dropdown-toggle" href="{% url 'shop' %}" id="dropdown04" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Shop</a>
+				<a class="nav-link dropdown-toggle" href="{% url 'shop' %}" id="dropdown04" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">About</a>
 				<div class="dropdown-menu" aria-labelledby="dropdown04">
-				  <a class="dropdown-item" href="{% url 'shop' %}">Shop</a>
-				  <a class="dropdown-item" href="{% url 'wishlist' %}">Wishlist</a>
-				  <a class="dropdown-item" href="{% url 'cart' %}">Cart</a>
-				  <a class="dropdown-item" href="{% url 'checkout' %}">Checkout</a>
+          <a class="dropdown-item" href="{% url 'about' %}">About</a>
+				  <a class="dropdown-item" href="#">Contact</a>
+				  {% comment %} <a class="dropdown-item" href="{% url 'wishlist' %}">Wishlist</a> {% endcomment %}
+				  <a class="dropdown-item" href="#">Blog</a>
+				  {% comment %} <a class="dropdown-item" href="{% url 'checkout' %}">Checkout</a> {% endcomment %}
 				</div>
 			  </li>
-			  <li class="nav-item"><a href="{% url 'about' %}" class="nav-link">About</a></li>
-			  <li class="nav-item"><a href="#" class="nav-link">Blog</a></li>
-			  <li class="nav-item"><a href="#" class="nav-link">Contact</a></li>
-			  <li class="nav-item cta cta-colored"><a href="cart.html" class="nav-link"><span class="icon-shopping_cart"></span>[0]</a></li>
+			  <li class="nav-item"><a href="#" class="nav-link">Wishlist</a></li>
+        <li class="nav-item"><a href="{% url 'shop' %}" class="nav-link">Shop</a></li>
+			  <li class="nav-item"><a href="{% url 'orders' %}" class="nav-link">Your Orders</a></li>
+			  <li class="nav-item cta cta-colored"><a href="{% url 'cart' %}" class="nav-link"><span class="icon-shopping_cart"></span>[0]</a></li>
 	  
 			  <!-- Added Login and Registration buttons -->
 			  {% if user.is_authenticated %}
@@ -159,17 +157,7 @@
 				{% else %}
 				<a href="{% url 'login' %}" class="nav-link" style="color:black; margin-top:13px;">Login</a>
 				<a href="{% url 'register' %}" class="nav-link" style="color:black;  margin-top:13px;">Register</a>
-			 {% comment %} </li>
-			<li class="nav-item dropdown">
-				<a href="#" class="nav-link dropdown-toggle" id="registerDropdown" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-					Register
-				</a>
-				<div class="dropdown-menu" aria-labelledby="registerDropdown"> {% endcomment %}
-					
-					{% comment %} <a class="dropdown-item" href="{% url 'customer_register' %}">Register as Customer</a> {% endcomment %}
-				{% comment %} </div> {% endcomment %}
     	{% endif %}
-			{% comment %} </li> {% endcomment %}
 			</ul>
 		  </div>
 		</div>
@@ -188,118 +176,114 @@
     </div>
 <!-- Your HTML structure for displaying cart items and total price -->
 <section class="ftco-section ftco-cart">
-    <div class="container">
-        <div class="row">
-            <div class="col-md-12 ftco-animate">
-                <div class="cart-list">
-                    <table class="table">
-                        <thead class="thead-primary">
-                            <tr class="text-center">
-                                <th>Product</th>
-                                <th>Product name</th>
-                                <th>Price</th>
-                                <th>Quantity</th>
-                                <th>Total</th>
-                                <th>Remove from Cart</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for cart_item in cart_items %}
-                            <tr class="text-center">
-                                <td class="product-thumbnail">
-                                    <img src="{{ cart_item.product.product_image.url }}" alt="{{ cart_item.product.product_name }}" class="img-fluid">
-                                </td>
-                                <td class="product-name">
-                                    <h3>{{ cart_item.product.product_name }}</h3>
-                                </td>
-                                <td class="price">RS {{ cart_item.product.product_price }}</td>
-                                <td class="quantity">
+  <div class="container">
+      <div class="row">
+          <div class="col-md-12 ftco-animate">
+              <div class="cart-list">
+                  <table class="table">
+                      <thead class="thead-primary">
+                          <tr class="text-center">
+                              <th>Product</th>
+                              <th>Product name</th>
+                              <th>Price</th>
+                              <th>Quantity</th>
+                              <th>Total</th>
+                              <th>Remove from Cart</th>
+                          </tr>
+                      </thead>
+                      <tbody>
+                          {% if cart_items %}
+                          {% for cart_item in cart_items %}
+                          <tr class="text-center">
+                              <td class="product-thumbnail">
+                                  <img src="{{ cart_item.product.product_image.url }}" alt="{{ cart_item.product.product_name }}" class="img-fluid">
+                              </td>
+                              <td class="product-name">
+                                  <h3>{{ cart_item.product.product_name }}</h3>
+                              </td>
+                              <td class="price">RS {{ cart_item.product.product_price }}</td>
+                              <td class="quantity">
                                   <form action="{% url 'update_cart_item' cart_item.id %}" method="post">
                                       {% csrf_token %}
                                       <input type="number" name="quantity" value="{{ cart_item.quantity }}" min="1" class="quantity-input">
                                       <button type="submit" class="btn btn-update-quantity">
-                                        <i class="fas fa-sync"></i> <!-- FontAwesome refresh icon -->
-                                    </button>                                                                      </form>
+                                          <i class="fas fa-sync"></i> <!-- FontAwesome refresh icon -->
+                                      </button>
+                                  </form>
                               </td>
-                                <td class="total">RS {{ cart_item.price }}</td>
-                                <input type="hidden" name="total_price" value="{{ total_price }}">                                                                          
-                                <td class="remove-from-cart">
-                                    <form action="{% url 'remove_from_cart' cart_item.id %}" method="post">
-                                        {% csrf_token %}
-                                        <button type="submit" class="btn btn-remove-from-cart">
+                              <td class="total">RS {{ cart_item.price }}</td>
+                              <input type="hidden" name="total_price" value="{{ total_price }}">
+                              <td class="remove-from-cart">
+                                  <form action="{% url 'remove_from_cart' cart_item.id %}" method="post">
+                                      {% csrf_token %}
+                                      <button type="submit" class="btn btn-remove-from-cart" id="deleteButton">
                                           <i class="fas fa-trash"></i> <!-- FontAwesome trash icon -->
                                       </button>
-                                    </form>
-                                </td>
-                            </tr><!-- END TR-->
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-                <div class="cart-total" style="align:center;">
-                    <h6>Total: RS {{ total_price|floatformat:2 }}</h6>
-                </div>
-            </div>
-        </div>
-        <div class="row justify-content-end">
-    			<div class="col-lg-4 mt-5 cart-wrap ftco-animate">
-            <div class="cart-total mb-3">
-                <h3>Cart Totals</h3>
-                <p class="d-flex">
-                    <span>Subtotal</span>
-                    <span>RS {{ total_price|floatformat:2 }}</span>
-                </p>
-                <p class="d-flex">
-                    <span>Delivery</span>
-                    <span>RS 0.00</span>
-                </p>
-                <p class="d-flex">
-                    <span>Discount</span>
-                    <span>RS 0.00</span>
-                </p>
-                <hr>
-                <p class="d-flex total-price">
-                    <span>Total</span>
-                    <span id="total-amount">RS {{ total_price|floatformat:2 }}</span>
-                </p>
-            </div>
-            <!-- Link to proceed to checkout -->
-            <p><a href="{% url 'checkout' %}" class="btn btn-primary py-3 px-4">Proceed to Checkout</a></p>
-        </div>        
-    		
-    </div>
-	{% comment %} <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
-  <script>
-    var options = {
-       
-      // Enter the Key ID generated from the Dashboard
-      key: "{{ razorpay_merchant_key }}",
-       
-      // Amount is in currency subunits.
-      // Default currency is INR. Hence,
-      // 50000 refers to 50000 paise
-      amount: "{{ razorpay_amount }}",
-      currency: "{{ currency }}",
-       
-      // Your/store name.
-      name: "Dj Razorpay",
-       
-      // Pass the `id` obtained in the response of Step 1
-      order_id: "{{ razorpay_order_id }}",
-      callback_url: "{{ callback_url }}",
-    };
-     
-    // initialise razorpay with the options.
-    var rzp1 = new Razorpay(options);
-     
-    // add event listener to the payment button.
-    document.getElementById("pay-btn").onclick = function (e) {
-      rzp1.open();
-      e.preventDefault();
-    };
-  </script> {% endcomment %}
+                                  </form>
+                              </td>
+                          </tr><!-- END TR-->
+                          {% endfor %}
+                          {% else %}
+                          <tr>
+                              <td colspan="6" class="text-center">Your cart is empty.</td>
+                          </tr>
+                          {% endif %}
+                      </tbody>
+                  </table>
+              </div>
+              <div class="cart-total" style="align:center;">
+                  <h6>Total: RS {{ total_price|floatformat:2 }}</h6>
+              </div>
+          </div>
+      </div>
+      <div class="row justify-content-end">
+          {% if cart_items %}
+          <div class="col-lg-4 mt-5 cart-wrap ftco-animate">
+              <div class="cart-total mb-3">
+                  <h3>Cart Totals</h3>
+                  <p class="d-flex">
+                      <span>Subtotal</span>
+                      <span>RS {{ total_price|floatformat:2 }}</span>
+                  </p>
+                  <p class="d-flex">
+                      <span>Delivery</span>
+                      <span>RS 0.00</span>
+                  </p>
+                  <p class="d-flex">
+                      <span>Discount</span>
+                      <span>RS 0.00</span>
+                  </p>
+                  <hr>
+                  <p class="d-flex total-price">
+                      <span>Total</span>
+                      <span id="total-amount">RS {{ total_price|floatformat:2 }}</span>
+                  </p>
+              </div>
+              <!-- Link to proceed to checkout -->
+              <p><a href="{% url 'checkout' %}" class="btn btn-primary py-3 px-4">Proceed to Checkout</a></p>
+          </div>
+          {% endif %}
+      </div>
+  </div>
 </section>
+<script>
+  // Function to handle the delete action
+  function handleDelete() {
+      // Display a confirmation dialog
+      var confirmed = window.confirm('Are you sure you want to delete?');
+      
+      // Check if the user confirmed
+      if (confirmed) {
+        
+      } else {
+          // User canceled the deletion
+          alert('Deletion canceled.');
+      }
+  }
 
+  // Add an event listener to the button to call the function
+  document.getElementById('deleteButton').addEventListener('click', handleDelete);
+</script>
 		<section class="ftco-section ftco-no-pt ftco-no-pb py-5 bg-light">
       <div class="container py-4">
         <div class="row d-flex justify-content-center py-5">
