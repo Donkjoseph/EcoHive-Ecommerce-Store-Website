@@ -16,7 +16,7 @@
                 {% csrf_token %}
                 <div class="form-group mb-3" style="margin-top: 30px;">
                     <label for="product_name">Product Name:</label>
-                    <input type="text" id="product_name" name="product_name" class="form-control" oninput="validateProductName()">
+                    <input type="text" id="product_name" name="product_name" class="form-control" oninput="validateProductName()" >
                     <span id="product_name_error" class="text-danger"></span>
                 </div>
                 <div class="form-group mb-3" style="margin-top: 10px;">

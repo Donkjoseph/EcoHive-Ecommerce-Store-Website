@@ -203,8 +203,7 @@
 							</span>
 
 						</div>
-						<div id="error-message" style="color: red; margin-left: 20px;"></div>
-						<div class="star-ratings">
+						 <div class="star-ratings">
 							<div class="star-rating">
 								<span class="filled-stars"></span>
 								<span class="empty-stars"></span>
@@ -218,35 +217,16 @@
 						<button type="submit" class="add-to-cart-button" name="buy_now" >Add to Cart</button><br><br>
 						<button type="submit" class="add-to-cart-button" name="buy_now">Buy Now</button>
 						{% endif %}
-					</form>
+					</form><br>
+					{% if messages %}
+					{% for message in messages %}
+					<div class="alert alert-danger text-center" style="width: 50%;">{{ message }}</div>
+					{% endfor %}						
+				  {% endif %}
 				</div>
 			</div>
 		</div>
 	</section>
-	<script>
-		document.addEventListener("DOMContentLoaded", function () {
-			const quantityInput = document.getElementById("quantity");
-			const stock = {{ product.product_stock }}; // Accessing the value from the Django context
-	
-			console.log("Quantity Input:", quantityInput); // Debugging statement
-	
-			quantityInput.addEventListener("input", function () {
-				console.log("Input value:", quantityInput.value); // Debugging statement
-				const quantity = parseInt(quantityInput.value);
-				const errorMessage = document.getElementById("error-message");
-	
-				console.log("Stock:", stock); // Debugging statement
-	
-				if (quantity > stock) {
-					errorMessage.textContent = "Quantity exceeds available stock!";
-					document.querySelector("button[name='buy_now']").disabled = true;
-				} else {
-					errorMessage.textContent = "";
-					document.querySelector("button[name='buy_now']").disabled = false;
-				}
-			});
-		});
-	</script>
 	
     {% comment %} <section class="ftco-section">
     	<div class="container">

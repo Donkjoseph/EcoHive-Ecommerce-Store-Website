@@ -555,32 +555,26 @@ def edit_product(request, product_id):
     categories = Category.objects.all()
 
     if request.method == 'POST':
-        new_product_name = request.POST['product_name']
+        # Update the product fields based on form input
+        product.product_description = request.POST['product_description']
 
-        # Check if a product with the same name already exists (excluding the current product)
-        if Product.objects.filter(product_name=new_product_name).exclude(id=product.id).exists():
-            messages.error(request, 'A product with this name already exists.')
-        else:
-            # Update the product fields based on form input
-            product.product_name = new_product_name
-            product.product_description = request.POST['product_description']
+        category_id = request.POST.get('select_category')
+        if category_id:
+            category = get_object_or_404(Category, id=category_id)
+            product.category = category
 
-            category_id = request.POST.get('select_category')
-            if category_id:
-                category = get_object_or_404(Category, id=category_id)
-                product.category = category
+        product.product_price = request.POST['product_price']
+        product.product_stock = request.POST['product_stock']
 
-            product.product_price = request.POST['product_price']
-            product.product_stock = request.POST['product_stock']
+        if 'product_image' in request.FILES:
+            product.product_image = request.FILES['product_image']
 
-            if 'product_image' in request.FILES:
-                product.product_image = request.FILES['product_image']
-
-            product.save()
-            messages.success(request, 'Product updated successfully.')
-            return redirect('viewaddproduct')
+        product.save()
+        messages.success(request, 'Product updated successfully.')
+        return redirect('viewaddproduct')
 
     return render(request, 'sellerdash/edit_product.html', {'product': product, 'categories': categories})
+
 
 def delete_add_product(request, product_id):
     product = get_object_or_404(Product, id=product_id)
@@ -606,27 +600,33 @@ def product_single(request, product_id):
     existing_cart_item = Cart.objects.filter(user=user, product=product).first()
     is_in_cart = existing_cart_item is not None
 
+    if request.method == 'POST':
+        # If it's a POST request, get the quantity from the form
+        quantity = int(request.POST.get('quantity', 1))  # Default to 1 if not provided
+
+        if quantity <= product.product_stock:
+            # If the quantity is valid, proceed to add/update the cart
+            image = product.product_image
+
+            if not is_in_cart:
+                # If the product is not in the cart, add it to the cart with the specified quantity
+                Cart.objects.create(user=user, product=product, quantity=quantity, image=image)
+            else:
+                # If the product is already in the cart, update the quantity
+                existing_cart_item.quantity += quantity
+                existing_cart_item.save()
+
+            return redirect('cart')  # Redirect to the cart page or any other page you prefer
+        else:
+            # If the quantity is greater than the available stock, display an error message
+            messages.error(request, 'Not enough stock available.')
+
     # Include the product stock in the context
     context = {
         'product': product,
         'is_in_cart': is_in_cart,
         'product_stock': product.product_stock,  # Pass the product stock to the template
     }
-
-    if request.method == 'POST':
-        # If it's a POST request, get the quantity from the form
-        quantity = int(request.POST.get('quantity', 1))  # Default to 1 if not provided
-        image = product.product_image
-
-        if not is_in_cart:
-            # If the product is not in the cart, add it to the cart with the specified quantity
-            Cart.objects.create(user=user, product=product, quantity=quantity, image=image)
-        else:
-            # If the product is already in the cart, update the quantity
-            existing_cart_item.quantity += quantity
-            existing_cart_item.save()
-
-        return redirect('cart')  # Redirect to the cart page or any other page you prefer
 
     return render(request, 'product-single.html', context)
 
@@ -640,20 +640,6 @@ def remove_from_cart(request, cart_item_id):
 
     return redirect('cart')
 
-def update_cart_item(request, cart_item_id):
-    if request.method == 'POST':
-        # Retrieve the cart item
-        cart_item = Cart.objects.get(id=cart_item_id)
-
-        # Get the new quantity from the form
-        new_quantity = int(request.POST.get('quantity'))
-
-        # Update the cart item's quantity
-        cart_item.quantity = new_quantity
-        cart_item.save()
-
-    # Redirect back to the cart view
-    return redirect('cart')
   
 
 def about(request):
@@ -710,6 +696,26 @@ def cart_view(request):
     }
 
     return render(request, 'cart.html', context)
+
+def update_cart_item(request, cart_item_id):
+    if request.method == 'POST':
+        # Retrieve the cart item
+        cart_item = Cart.objects.get(id=cart_item_id)
+
+        # Get the new quantity from the form
+        new_quantity = int(request.POST.get('quantity'))
+
+        if new_quantity > 0 and new_quantity <= cart_item.product.product_stock:
+            # Update the cart item's quantity if it's a valid value
+            cart_item.quantity = new_quantity
+            cart_item.save()
+        else:
+            # Display an error message if the quantity is invalid
+            messages.error(request, 'Invalid quantity.')
+
+    # Redirect back to the cart view
+    return redirect('cart')
+
 
 from .models import BillingDetails, Cart, Order  # Import your models here
 from django.shortcuts import render, redirect
