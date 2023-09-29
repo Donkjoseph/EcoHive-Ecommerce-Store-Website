@@ -24,9 +24,9 @@
         <form class="signin-form" method="post">
             {% csrf_token %}
             {% comment %} <input type="text" class="signinelement" placeholder="User Name" required name="username"> {% endcomment %}
-            <input type="text" class="signinelement" name="{{ form.username.name }}" id="username" id="{{ form.username.id_for_label }}" placeholder="User Name" required>
+            <input type="text" class="signinelement" name="{{ form.username.name }}" name="username" id="{{ form.username.id_for_label }}" placeholder="User Name" required>
             {% comment %} <input type="password" class="signinelement" placeholder="password" required name="password"> {% endcomment %}
-            <input type="password" class="signinelement" name="{{ form.password.name }}"id="password" id="{{ form.password.id_for_label }}" placeholder="Password" required><br><br>
+            <input type="password" class="signinelement" name="{{ form.password.name }}" name="password" id="{{ form.password.id_for_label }}" placeholder="Password" required><br><br>
             <span class="mb-0 text-muted" style="margin-left: 60px; color:red;">
                 {% if msg %}
                     {{ msg | safe }}

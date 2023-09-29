@@ -38,6 +38,8 @@ urlpatterns = [
     path('admindash', views.admindash, name='admindash'),
     path('addcategory', views.addcategory, name='addcategory'),
     path('viewcategory', views.viewcategory, name='viewcategory'),
+    path('sellerorder', views.sellerorder, name='sellerorder'),
+
 
     path('viewaddproduct', views.viewaddproduct, name='viewaddproduct'),
     path('addproducts', views.addproducts, name='addproducts'),
@@ -95,6 +97,10 @@ urlpatterns = [
     path('view_orders', views.view_orders, name='view_orders'),
 
 
+    # path('wishlist/', views.wishlist_view, name='wishlist'),
+    # path('remove_from_wishlist/<int:wishlist_item_id>/',views.remove_from_wishlist, name='remove_from_wishlist'),
+    # path('add_productwishlist/<int:product_id>/', views.add_productwishlist, name='add_productwishlist'),
+    # path('remove_all_from_wishlist/', views.remove_all_from_wishlist, name='remove_all_from_wishlist'),
 
 
     path('about', views.about, name='about'),

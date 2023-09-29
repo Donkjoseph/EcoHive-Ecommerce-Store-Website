@@ -81,6 +81,7 @@ class BillingDetailsAdmin(admin.ModelAdmin):
     search_fields = ('user__username', 'email')
 
 from .models import Order
+from .models import OrderItem
 
 @admin.register(Order)
 class OrderAdmin(admin.ModelAdmin):
@@ -89,3 +90,17 @@ class OrderAdmin(admin.ModelAdmin):
     search_fields = ('user__username', 'razorpay_order_id')
     readonly_fields = ('razorpay_order_id',)  # If you want to make razorpay_order_id read-only in the admin
 
+@admin.register(OrderItem)
+class OrderItemAdmin(admin.ModelAdmin):
+    list_display = ('order', 'product', 'seller', 'quantity', 'price', 'total_price')
+    list_filter = ('order', 'product', 'seller')
+    search_fields = ('order__user__username', 'product__product_name', 'seller__username')
+
+from .models import Wishlist
+
+class WishlistAdmin(admin.ModelAdmin):
+    list_display = ('user', 'product', 'quantity', 'date_added')
+    list_filter = ('user', 'date_added')
+    search_fields = ('user__username', 'product__product_name')
+
+admin.site.register(Wishlist, WishlistAdmin)

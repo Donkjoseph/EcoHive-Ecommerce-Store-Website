@@ -717,7 +717,7 @@ def update_cart_item(request, cart_item_id):
     return redirect('cart')
 
 
-from .models import BillingDetails, Cart, Order  # Import your models here
+from .models import BillingDetails, Cart, Order, OrderItem  # Import your models here
 from django.shortcuts import render, redirect
 from decimal import Decimal
 
@@ -823,7 +823,20 @@ def payment(request):
 
     # Add the products to the order
     for cart_item in cart_items:
-        order.products.add(cart_item.product)
+        product = cart_item.product
+        price = product.product_price
+        quantity = cart_item.quantity
+        total_item_price = price * quantity
+
+        # Create an OrderItem for this product
+        order_item = OrderItem.objects.create(
+            order=order,
+            product=product,
+            seller=product.seller,  # Set the seller of the product as the seller of the order item
+            quantity=quantity,
+            price=price,
+            total_price=total_item_price,
+        )
 
     # Save the order to generate an order ID
     order.save()
@@ -908,15 +921,35 @@ def paymenthandler(request):
 
 @login_required
 def orders(request):
-    orders = Order.objects.filter(user=request.user)
-
+    # Retrieve orders for the currently logged-in user
+    user_orders = Order.objects.filter(user=request.user)
+    
     context = {
-        'orders': orders,
+        'orders': user_orders,
     }
-
+    
     return render(request, 'orders.html', context)
 
 def view_orders(request):
     all_orders = Order.objects.all()
 
     return render(request, 'admindash/view_orders.html', {'all_orders': all_orders})
+
+@login_required
+def sellerorder(request):
+    current_user = request.user
+
+    # Check if the current user is a seller
+    if current_user.is_seller:
+        # If the user is a seller, retrieve the seller profile
+        current_seller = current_user.seller
+
+        # Retrieve the orders for the current seller
+        seller_orders = OrderItem.objects.filter(seller=current_seller)
+
+        context = {
+            'seller': current_seller,
+            'seller_orders': seller_orders,
+        }
+
+    return render(request, 'sellerdash/sellerorder.html', context)

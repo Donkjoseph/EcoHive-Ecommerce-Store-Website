@@ -206,7 +206,23 @@ class Order(models.Model):
         max_length=20, choices=PaymentStatusChoices.choices, default=PaymentStatusChoices.PENDING)
     def _str_(self):
         return self.user.username 
+class OrderItem(models.Model):
+    order = models.ForeignKey(Order, on_delete=models.CASCADE)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    seller = models.ForeignKey(Seller, on_delete=models.CASCADE)  # Assuming the seller is also a User
+    quantity = models.PositiveIntegerField()
+    price = models.DecimalField(max_digits=10, decimal_places=2)
+    total_price = models.DecimalField(max_digits=10, decimal_places=2)
 
+    def save(self, *args, **kwargs):
+        # Calculate the total price for this order item based on quantity and price
+        self.total_price = self.quantity * self.price
+        super(OrderItem, self).save(*args, **kwargs)
+        
+        # Update the total order price in the associated Order model
+        order = self.order
+        order.total_order_price = sum(order_item.total_price for order_item in order.orderitem_set.all())
+        order.save()
 class Review(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     product = models.ForeignKey(Product, on_delete=models.CASCADE)  # Replace Product with your product model
@@ -215,3 +231,14 @@ class Review(models.Model):
 
     def __str__(self):
         return f"Review by {self.user.username} for {self.product.product_name}"
+    
+class Wishlist(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    quantity = models.PositiveIntegerField(default=1)
+    date_added = models.DateTimeField(auto_now_add=True)
+    price = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    image = models.ImageField(upload_to='Wishlist_item_images/', blank=True, null=True)  # Add image field
+
+    def __str__(self):
+        return f"{self.user.username}'s Wishlist Item - {self.product.product_name}"

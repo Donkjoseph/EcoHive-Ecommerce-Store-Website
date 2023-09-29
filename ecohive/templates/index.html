@@ -77,8 +77,8 @@
 				  {% comment %} <a class="dropdown-item" href="{% url 'checkout' %}">Checkout</a> {% endcomment %}
 				</div>
 			  </li>
-			  <li class="nav-item"><a href="#" class="nav-link">Wishlist</a></li>
-        <li class="nav-item"><a href="{% url 'shop' %}" class="nav-link">Shop</a></li>
+			  <li class="nav-item"><a href="{% url 'wishlist' %}" class="nav-link">Wishlist</a></li>
+        <li class="nav-item"><a href="{% url 'shop' %}" id="top" class="nav-link">Shop</a></li>
 			  <li class="nav-item"><a href="{% url 'orders' %}" class="nav-link">Your Orders</a></li>
 			  <li class="nav-item cta cta-colored"><a href="{% url 'cart' %}" class="nav-link"><span class="icon-shopping_cart"></span>[0]</a></li>
 	  
@@ -252,22 +252,48 @@
           </div>
         </div>   		
     	</div>
-    	<style>
-        /* CSS for product containers */
+      <style>
         .product {
-            width: 250px; /* Set the width of each product container */
-            height: 350px; /* Set the height of each product container */
-            margin: 10px; /* Add some margin between the product containers */
-            /* Add additional styling as needed */
+            width: 100%;
+            height: auto;
+            border: 1px solid #ccc;
+            margin-bottom: 20px;
+            position: relative;
         }
-    
-        /* CSS for product images */
-        .product img {
-            max-width: 100%; /* Set the maximum width to ensure responsiveness */
-            max-height: 100%; /* Set the maximum height to ensure the image fits within the container */
-            width: auto; /* Automatically adjust the width while maintaining aspect ratio */
-            height: auto; /* Automatically adjust the height while maintaining aspect ratio */
+
+        /* Style for the product image container */
+        .img-container {
+            position: relative;
+            width: 100%;
+            padding-bottom: 100%;
+            overflow: hidden;
         }
+
+        /* Style for the product image */
+        .img-container img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* Style for the status overlay */
+        .status {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: green;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+        }
+
+        .out-of-stock {
+          opacity: 0.6; /* Reduce opacity for a faded look */
+          pointer-events: none; /* Disable pointer events for this element */
+      }
     </style>
     
     <div class="container">
@@ -275,14 +301,17 @@
           {% for product in products %}
           <div class="col-md-6 col-lg-3 ftco-animate">
               <div class="product">
-                  <a href="#" class="img-prod">
-                      {% if product.product_image %}
-                      <img class="img-fluid" src="{{ product.product_image.url }}" alt="{{ product.product_name }}">
-                      {% else %}
-                      <img class="img-fluid" src="path_to_no_image_available.jpg" alt="No Image Available">
-                      {% endif %}
-                      <div class="overlay"></div>
-                  </a>
+                <a href="{% url 'product_single' product.id %}" class="img-prod">
+                  <div class="img-container">
+                      <img class="img-fluid" src="{{ product.product_image.url }}" alt="Product Image">
+                  </div>
+                  {% if product.product_stock > 0 %}
+                  <span class="status in-stock">In Stock</span>
+                  {% else %}
+                  <span class="status out-of-stock">Out of Stock</span>
+                  {% endif %}
+                  <div class="overlay"></div>
+              </a>
                   <div class="text py-3 pb-4 px-3 text-center">
                       <h3><a href="#">{{ product.product_name }}</a></h3>
                       {% comment %} <p>{{ product.product_description }}</p>
