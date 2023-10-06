@@ -24,7 +24,8 @@ from allauth.account.views import SignupView
 from allauth.socialaccount.providers.oauth2.client import OAuth2Error
 from allauth.socialaccount.providers.oauth2.views import OAuth2LoginView
 from .models import Cart
-
+from django.core.mail import send_mail
+from django.conf import settings
 
 # from .forms import CustomUserCreationForm
   
@@ -529,6 +530,11 @@ def reject_certification(request, certification_id):
     if request.method == 'POST':
         certification.is_approved = Certification.REJECTED  # Set it to 'rejected'
         certification.save()
+        subject = 'Important Notice: Your License Application Has Been Declined'
+        message = 'We regret to inform you that your recent license application has been declined, and as a result, you will not be able to add your plants on our platform. '
+        from_email = settings.EMAIL_HOST_USER  # Your sender email address
+        recipient_list = [certification.user.email]
+        send_mail(subject, message, from_email,recipient_list)
     return redirect('dashlegal')
 
 from .models import ProductSummary
@@ -590,7 +596,6 @@ def wishlist(request):
     # Add your logic here
     return render(request, 'wishlist.html')
 
-
 @login_required
 def product_single(request, product_id):
     product = get_object_or_404(Product, pk=product_id)
@@ -599,6 +604,9 @@ def product_single(request, product_id):
     # Check if the product is already in the user's cart
     existing_cart_item = Cart.objects.filter(user=user, product=product).first()
     is_in_cart = existing_cart_item is not None
+
+    # Retrieve related products with the same seller
+    related_products = Product.objects.filter(seller=product.seller).exclude(id=product.id)[:4]
 
     if request.method == 'POST':
         # If it's a POST request, get the quantity from the form
@@ -621,15 +629,15 @@ def product_single(request, product_id):
             # If the quantity is greater than the available stock, display an error message
             messages.error(request, 'Not enough stock available.')
 
-    # Include the product stock in the context
+    # Include the product stock and related products in the context
     context = {
         'product': product,
         'is_in_cart': is_in_cart,
         'product_stock': product.product_stock,  # Pass the product stock to the template
+        'related_products': related_products,  # Pass related products to the template
     }
 
     return render(request, 'product-single.html', context)
-
 
 
 def remove_from_cart(request, cart_item_id):
@@ -639,8 +647,6 @@ def remove_from_cart(request, cart_item_id):
         cart_item.delete()
 
     return redirect('cart')
-
-  
 
 def about(request):
     # Add your logic here
@@ -674,12 +680,11 @@ def category_fruits(request):
     return render(request, 'category_fruits.html', context)
 
 
-    
 def paymentsuccess(request):
     # Add your logic here
     return render(request, 'paymentsuccess.html')
 
-
+@login_required
 def cart_view(request):
     # Assuming you have user authentication and each user has a unique cart
     user = request.user
@@ -781,7 +786,6 @@ def checkout(request):
     }
 
     return render(request, 'checkout.html', context)
-
 
 #payment
 from django.shortcuts import render
@@ -915,6 +919,7 @@ def paymenthandler(request):
 
         # Redirect to a payment success page
         return redirect('orders')
+    
 
     return HttpResponseBadRequest("Invalid request method")
 
@@ -953,3 +958,54 @@ def sellerorder(request):
         }
 
     return render(request, 'sellerdash/sellerorder.html', context)
+
+
+
+
+from django.http import JsonResponse
+from .models import Product
+
+def live_search(request):
+    if request.method == 'GET':
+        search_query = request.GET.get('query', '')
+        results = Product.objects.filter(product_name__icontains=search_query)
+        product_data = []
+
+        for product in results:
+            # Perform any necessary calculations here
+            product_info = {
+                'name': product.product_name,
+                'prod_id':product.id,
+                'price': product.product_price, 
+                'img': product.product_image.url, 
+               
+                 # Use the correct field for the image URL
+            }
+            product_data.append(product_info)
+
+        return JsonResponse({'products': product_data})
+    
+
+from django.http import HttpResponse
+from django.template.loader import get_template
+from xhtml2pdf import pisa  # Import for PDF generation
+from .models import Order
+
+def generate_pdf(request, order_id):
+    order = get_object_or_404(Order, id=order_id)
+
+    # Create a Django HTML template for the PDF content
+    template = get_template('pdf_order.html')
+    context = {'order': order}
+    html = template.render(context)
+
+    # Create a PDF file using the HTML content
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename="Invoice{order_id}.pdf"'
+
+    # Generate PDF from HTML using xhtml2pdf
+    pisa_status = pisa.CreatePDF(html, dest=response)
+    if pisa_status.err:
+        return HttpResponse('Error generating PDF', status=500)
+
+    return response

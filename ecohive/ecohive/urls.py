@@ -95,6 +95,7 @@ urlpatterns = [
     path('payment', views.payment, name='payment'),
     path('orders/', views.orders, name='orders'),
     path('view_orders', views.view_orders, name='view_orders'),
+    path('generate_pdf/<int:order_id>/', views.generate_pdf, name='generate_pdf'),
 
 
     # path('wishlist/', views.wishlist_view, name='wishlist'),
@@ -111,6 +112,10 @@ urlpatterns = [
     #payment
     path('paymenthandler/', views.paymenthandler, name='paymenthandler'),
     path('paymentsuccess/', views.paymentsuccess, name='productsuccess'),
+
+
+
+    path('live_search/', views.live_search, name='live_search'),
 
 
 
