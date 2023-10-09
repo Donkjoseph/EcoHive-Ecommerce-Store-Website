@@ -64,6 +64,12 @@
                     <input type="text" id="{{ form.certification_number.id_for_label }}" name="{{ form.certification_number.name }}" class="form-control" required>
                     <span class="text-danger" id="certification-number-error"></span>
                 </div>
+                <div class="form-group">
+                    <!-- Display the 'certification_number' field -->
+                    <label for="{{ form.address.id_for_label }}">Full Address:</label>
+                    <textarea id="{{ form.address.id_for_label }}" name="{{ form.address.name }}" class="form-control" required></textarea>
+                    <span class="text-danger" id="address-error"></span>
+                </div>
             
                 <div class="form-group">
                     <!-- Display the 'certification_image' field -->

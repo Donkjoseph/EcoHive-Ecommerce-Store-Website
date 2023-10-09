@@ -30,12 +30,7 @@ class User(AbstractUser):
         related_query_name='user_permission'
     )
 
-class Seller(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
 
-    # Other fields specific to the Seller model
-    def __str__(self):
-        return self.user.username 
      
 @receiver(post_save, sender=User)
 def create_seller_profile(sender, instance, created, **kwargs):
@@ -79,13 +74,20 @@ class Certification(models.Model):
     certification_authority = models.CharField(max_length=200)
     phone_number = models.CharField(max_length=15, default="N/A")  # Change the default value as needed
     certification_number = models.CharField(max_length=50, default="N/A")  # Change the default value as needed
+    address = models.CharField(max_length=255,default=1)
     timestamp = models.DateTimeField(auto_now_add=True)
     is_approved = models.CharField(
         max_length=10,
         choices=APPROVAL_CHOICES,
         default=PENDING,
     )
+class Seller(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    certification = models.ForeignKey(Certification, on_delete=models.CASCADE,default=1)
 
+    # Other fields specific to the Seller model
+    def __str__(self):
+        return self.user.username 
 class Category(models.Model):
     category_name = models.CharField(max_length=100)
     category_description = models.TextField()

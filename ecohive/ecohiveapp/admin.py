@@ -24,7 +24,7 @@ admin.site.register(User, CustomUserAdmin)
 
 @admin.register(Certification)  # Update the model name to OrganicCertification
 class CertificationAdmin(admin.ModelAdmin):
-    list_display = ('first_name', 'last_name', 'certification_authority', 'certification_number', 'certification_image', 'timestamp','is_approved')  # Add 'certification_number' to list_display
+    list_display = ('first_name', 'last_name', 'certification_authority', 'certification_number','address', 'certification_image', 'timestamp','is_approved')  # Add 'certification_number' to list_display
     list_filter = ('certification_authority',)  # Add a comma to make it a tuple
     search_fields = ('first_name', 'last_name', 'certification_authority')
 

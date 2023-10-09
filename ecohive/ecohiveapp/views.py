@@ -418,111 +418,39 @@ def profile(request):
     return render(request, 'userprofile/user_profile.html', {'user_profile': user_profile})
 
 
-
 def user_dashboard(request):
     return render(request,'userprofile/user_dashboard.html')
 
 def user_list(request):
     users = User.objects.all()
-
-    if request.method == 'POST':
-        # Handle form submission and update user details
-        user_id = request.POST['user_id']
-        user = get_object_or_404(User, id=user_id)
-
-        user.username = request.POST['username']
-        user.email = request.POST['email']
-
-        role = request.POST.get('role')
-
-        if role == 'customer':
-            user.is_customer = True
-            user.is_seller = False
-            user.is_admin = False
-            user.is_legaladvisor = False
-        elif role == 'seller':
-            user.is_customer = False
-            user.is_seller = True
-            user.is_admin = False
-            user.is_legaladvisor = False
-        elif role == 'admin':
-            user.is_customer = False
-            user.is_seller = False
-            user.is_admin = True
-            user.is_legaladvisor = False
-        elif role == 'legaladvisor':
-            user.is_customer = False
-            user.is_seller = False
-            user.is_admin = False
-            user.is_legaladvisor = True
-        # Update user status based on the selected status option
-        status = request.POST.get('status')
-        if status == 'active':
-            user.is_active = True
-        else:
-            user.is_active = False
-
-        user.save()
-
-        # Return a JSON response to indicate a successful update
-        return JsonResponse({'success': True})
-    
     return render(request, 'admindash/userlist.html', {'users': users})
+    
+def user_status_toggle(request, user_id):
+    if request.method == "POST":
+        action = request.POST.get("action")
+        user = User.objects.get(pk=user_id)  # Use your custom user model
 
-from django.views.decorators.csrf import csrf_exempt
-@csrf_exempt  # Use csrf_exempt for simplicity; consider using a csrf token for security in production
-def delete_user(request, user_id):
-    # Check if the request method is POST (for safety, you might want to use a confirmation modal before sending the request)
-    if request.method == 'POST':
-        # Get the user object to delete
-        user = get_object_or_404(User, id=user_id)
-
-        # Check if the user can be deleted (e.g., you might want to add custom logic here)
-        if not user.is_superuser:
-            user.delete()
-            return JsonResponse({'message': 'User deleted successfully.'})
-
-    return JsonResponse({'error': 'Unable to delete user.'}, status=400)
-
-def edit_user(request, user_id):
-    user = get_object_or_404(User, id=user_id)
-
-    if request.method == 'POST':
-        # Handle form submission and update user details
-        user.username = request.POST['username']
-        user.email = request.POST['email']
-
-        # Update user role based on the selected role option
-        role = request.POST.get('role')
-        if role == 'customer':
-            user.is_seller = False
-            user.is_superuser = False
-            user.is_customer = True
-        elif role == 'seller':
-            user.is_seller = False
-            user.is_superuser = False
-            user.is_customer = True
-        elif role == 'superuser':
-            user.is_seller = False
-            user.is_superuser = False
-            user.is_customer = True
-        status = request.POST.get('status')
-        if status == 'active':
-            user.is_active = True
-        elif status == 'inactive':
+        if action == "deactivate":
             user.is_active = False
-
+        elif action == "activate":
+            user.is_active = True
 
         user.save()
-        return redirect('user_list')  # Redirect back to the user list page
 
-    return render(request, 'admindash/edituser.html', {'user': user})
+    # Redirect back to the user list page after processing the request.
+    return redirect('user_list')
+
 
 def approve_certification(request, certification_id):
     certification = get_object_or_404(Certification, id=certification_id)
     if request.method == 'POST':
         certification.is_approved = Certification.APPROVED  # Set it to 'approved'
         certification.save()
+        subject = 'Congratulations! Your License Has Been Approved'
+        message = 'We are delighted to inform you that your license application has been successfully approved. Your dedication and compliance with the necessary requirements have made this approval possible. We appreciate your patience throughout the process. With your approved license, you are now officially recognized and authorized to add your plants. '
+        from_email = settings.EMAIL_HOST_USER  # Your sender email address
+        recipient_list = [certification.user.email]
+        send_mail(subject, message, from_email,recipient_list)
     return redirect('dashlegal')
 
 def reject_certification(request, certification_id):
@@ -531,7 +459,7 @@ def reject_certification(request, certification_id):
         certification.is_approved = Certification.REJECTED  # Set it to 'rejected'
         certification.save()
         subject = 'Important Notice: Your License Application Has Been Declined'
-        message = 'We regret to inform you that your recent license application has been declined, and as a result, you will not be able to add your plants on our platform. '
+        message = 'We regret to inform you that your recent seller application has been declined, and as a result, you will not be able to add your products on our platform. '
         from_email = settings.EMAIL_HOST_USER  # Your sender email address
         recipient_list = [certification.user.email]
         send_mail(subject, message, from_email,recipient_list)
@@ -606,7 +534,10 @@ def product_single(request, product_id):
     is_in_cart = existing_cart_item is not None
 
     # Retrieve related products with the same seller
-    related_products = Product.objects.filter(seller=product.seller).exclude(id=product.id)[:4]
+    related_products = Product.objects.exclude(id=product.id).filter(seller__id__in=Product.objects.filter(id=product.id).values('seller__id'))[:4]
+    other_related_products = Product.objects.exclude(id=product.id).exclude(seller=product.seller)[:4]
+
+    seller_address = product.seller.certification.address
 
     if request.method == 'POST':
         # If it's a POST request, get the quantity from the form
@@ -634,7 +565,10 @@ def product_single(request, product_id):
         'product': product,
         'is_in_cart': is_in_cart,
         'product_stock': product.product_stock,  # Pass the product stock to the template
-        'related_products': related_products,  # Pass related products to the template
+        'related_products': related_products,
+        'other_related_products': other_related_products,  # Pass other related products to the template
+        'seller_address': seller_address,
+
     }
 
     return render(request, 'product-single.html', context)
@@ -983,8 +917,7 @@ def live_search(request):
             }
             product_data.append(product_info)
 
-        return JsonResponse({'products': product_data})
-    
+        return JsonResponse({'products': product_data})  
 
 from django.http import HttpResponse
 from django.template.loader import get_template

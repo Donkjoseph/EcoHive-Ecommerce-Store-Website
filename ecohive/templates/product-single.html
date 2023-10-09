@@ -111,6 +111,8 @@
 	
 					<!-- Display the seller's information -->
 					<p>Seller: {{ product.seller }}</p>
+					<strong>Seller's Address:</strong>
+					<p>{{ seller_address }}</p>				
 					<h5>Total Stock: {{ product.product_stock }} KG left</h5>
 					<!-- Add to cart button or other actions as needed -->
 					<form method="post">
@@ -138,37 +140,13 @@
 						</div>
 						{% if is_in_cart %}
 						<p style="margin-left:20px;"> Product is already in your cart </p>
-						<form method="post" action="{% url 'checkout' %}">
-							{% csrf_token %}
-							<input type="hidden" name="product_name" value="{{ product.product_name }}">
-							<input type="hidden" name="product_price" value="{{ product.product_price }}">
-							<input type="hidden" name="product_description" value="{{ product.product_description }}">
-							
-							<!-- Include the quantity field as a hidden input -->
-							<input type="hidden" name="quantity" value="1">
-							
-							<!-- Your existing form fields go here -->
-							
-							<button type="submit" class="add-to-cart-button" name="place_order">Buy Now</button>
-						</form>
+						<button type="submit" class="add-to-cart-button" name="place_order">Buy Now</button>
 						<a href="{% url 'cart' %}" id="cartlink" >Go to Cart</a>
 						{% else %}
 						<button type="submit" class="add-to-cart-button" name="buy_now" >Add to Cart</button><br><br>
 						{% endif %}
 					</form><br>
-					<form method="post" action="{% url 'checkout' %}">
-						{% csrf_token %}
-						<input type="hidden" name="product_name" value="{{ product.product_name }}">
-						<input type="hidden" name="product_price" value="{{ product.product_price }}">
-						<input type="hidden" name="product_description" value="{{ product.product_description }}">
-						
-						<!-- Include the quantity field as a hidden input -->
-						<input type="hidden" name="quantity" value="1">
-						
-						<!-- Your existing form fields go here -->
-						
-						<button type="submit" class="add-to-cart-button" name="place_order">Buy Now</button>
-					</form>
+					<button type="submit" class="add-to-cart-button" name="place_order">Buy Now</button>
 					{% if messages %}
 					{% for message in messages %}
 					<div class="alert alert-danger text-center" style="width: 50%;">{{ message }}</div>
@@ -178,7 +156,6 @@
 			</div>
 		</div>
 	</section>
-	
 	<section class="ftco-section">
 		<div class="container">
 			<div class="row justify-content-center mb-3 pb-3">
@@ -191,7 +168,7 @@
 		</div>
 		<div class="container">
 			<div class="row">
-				{% for product in related_products %}
+			{% for product in other_related_products %}
 				<div class="col-md-6 col-lg-3 ftco-animate">
 					<div class="product">
 						<a href="{% url 'product_single' product.id %}" class="img-prod">
@@ -232,5 +209,40 @@
 			</div>
 		</div>
 	</section>
+	<script>
+		$(document).ready(function(){
 
+		var quantitiy=0;
+		   $('.quantity-right-plus').click(function(e){
+		        
+		        // Stop acting like a button
+		        e.preventDefault();
+		        // Get the field name
+		        var quantity = parseInt($('#quantity').val());
+		        
+		        // If is not undefined
+		            
+		            $('#quantity').val(quantity + 1);
+
+		          
+		            // Increment
+		        
+		    });
+
+		     $('.quantity-left-minus').click(function(e){
+		        // Stop acting like a button
+		        e.preventDefault();
+		        // Get the field name
+		        var quantity = parseInt($('#quantity').val());
+		        
+		        // If is not undefined
+		      
+		            // Increment
+		            if(quantity>0){
+		            $('#quantity').val(quantity - 1);
+		            }
+		    });
+		    
+		});
+	</script>
 	{%endblock%}

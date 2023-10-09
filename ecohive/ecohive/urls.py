@@ -72,8 +72,8 @@ urlpatterns = [
     path('profile', views.profile, name='profile'),
     path('user_dashboard/', views.user_dashboard, name='user_dashboard'),
     path('user_list', views.user_list, name='user_list'),
-    path('edit_user/<int:user_id>/', views.edit_user, name='edit_user'),
-    path('delete_user/<int:user_id>/', views.delete_user, name='delete_user'),
+    path('toggle_user_status/<int:user_id>/', views.user_status_toggle, name='user_status_toggle'),
+
 
 
     path('viewstock', views.view_products, name='viewstock'),

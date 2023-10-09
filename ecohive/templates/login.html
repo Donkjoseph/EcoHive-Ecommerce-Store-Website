@@ -35,8 +35,8 @@
             <p id="signinelement2"><a href="password_reset" style="color: #27350F; text-decoration: none">Forgot password?</a></p>
             <div class="icon-container">
                 <a href="{% provider_login_url 'google'%}?next=/"><span id="icon" class="fab fa-google" style="color: red"></span></a>
-                <a href="#"><span id="icon" class="fab fa-facebook" style="color: blue"></span></a> <!-- Facebook icon placeholder -->
-                <a href="#"><span id="icon" class="fab fa-twitter" style="color: #1DA1F2"></span></a> <!-- Twitter icon placeholder -->
+                {% comment %} <a href="#"><span id="icon" class="fab fa-facebook" style="color: blue"></span></a> <!-- Facebook icon placeholder -->
+                <a href="#"><span id="icon" class="fab fa-twitter" style="color: #1DA1F2"></span></a> <!-- Twitter icon placeholder --> {% endcomment %}
             </div>
             <button class="signinbtn" id="login_button" type="submit">Login</button>
             
