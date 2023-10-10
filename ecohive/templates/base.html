@@ -278,25 +278,28 @@
                     success: function (data) {
                         var results = data.products;
                         var resultsHtml = '';
-                        resultsHtml += '<div class="product-container" style="display:flex; flex-direction:row; gap:10px;">';
-                        if (results.length === 0) {
-                            // If there are no results, insert a default image
-                            resultsHtml += '<div class="product-inf" style="height:600px; width:600px; margin:auto; align-items:center; text-align:center;">';
-                            resultsHtml += '<img style="height:450px; width:450px;" src="{% static 'img/not-found.svg' %}" alt="Default Image">';
-                            resultsHtml += '<h3>No products found</h3>';
-                            resultsHtml += '</div>';
-                } else {
-                    for(var i = 0; i<results.length; i++) {
-                      resultsHtml += '<div style="display: flex; flex-direction: column; align-items: center; text-align: center; margin-right: 20px; width: 30%;">';
-                        resultsHtml += '<a href="/product/' + results[i].prod_id + '/">';
-                        resultsHtml += '<img style="width: 200px; height: 200px;" src="' + results[i].img + '" alt="' + results[i].name + '">';
-                        resultsHtml += '</a>';
-                        resultsHtml += '<a href="/product/' + results[i].prod_id + '/" class="text-truncate">' + results[i].name + '</a>';
-                        resultsHtml += '<span class="text-truncate">' + results[i].price + '</span>';
-                        resultsHtml += '</div>';
-                                        }
-                                    }
-                                    resultsHtml += '</div>';
+                        resultsHtml += '<div class="product-container" style="display:flex; flex-wrap: wrap; gap:10px;">'; // Use flex-wrap to allow multiple rows
+
+                          if (results.length === 0) {
+                              // If there are no results, insert a default image
+                              resultsHtml += '<div class="product-inf" style="flex-basis: calc(33.33% - 20px); text-align:center;">'; // Set width to 33.33% for each product in a row
+                              resultsHtml += '<img style="width: 100%;" src="{% static 'img/not-found.svg' %}" alt="Default Image">';
+                              resultsHtml += '<h3>No products found</h3>';
+                              resultsHtml += '</div>';
+                          } else {
+                              for (var i = 0; i < results.length; i++) {
+                                  resultsHtml += '<div style="flex-basis: calc(33.33% - 20px); display: flex; flex-direction: column; align-items: center; text-align: center; margin-bottom: 20px;">'; // Set width to 33.33% for each product in a row
+                                  resultsHtml += '<a href="/product/' + results[i].prod_id + '/">';
+                                  resultsHtml += '<img style="width: 40%;" src="' + results[i].img + '" alt="' + results[i].name + '">';
+                                  resultsHtml += '</a>';
+                                  resultsHtml += '<a href="/product/' + results[i].prod_id + '/" class="text-truncate">' + results[i].name + '</a>';
+                                  resultsHtml += '<span class="text-truncate">' + results[i].price + '</span>';
+                                  resultsHtml += '</div>';
+                              }
+                          }
+                          
+                          resultsHtml += '</div>';
+                          
             if (query) {
                 $('#search-results').html(resultsHtml);
                 $('#search-results').show();

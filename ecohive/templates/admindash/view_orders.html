@@ -24,15 +24,6 @@
     .custom-table tbody tr:nth-child(odd) {
         background-color: #f2f2f2;
     }
-    .status-pending {
-        color: #FF5733; /* Red for Pending status */
-    }
-    .status-successful {
-        color: #4CAF50; /* Green for Successful status */
-    }
-    .status-failed {
-        color: #FFC300; /* Yellow for Failed status */
-    }
     .card {
         border: none;
         border-radius: 10px;
@@ -66,8 +57,18 @@
                                     <td>{{ order.user.username }}</td>
                                     <td>{{ order.order_date }}</td>
                                     <td>RS {{ order.total_price }}</td>
-                                    <td class="status-{{ order.payment_status }}">{{ order.get_payment_status_display }}</td>
-                                </tr>
+                                    <td>
+                                        {% if order.payment_status == 'successful' %}
+                                          <div style="color: green; font-weight: bold;">
+                                            <span style="background-color: lightgreen; padding: 3px 5px; border-radius: 3px;">&#10004;</span> Paid
+                                          </div>
+                                        {% else %}
+                                          <div style="color: red; font-weight: bold;">
+                                            <span style="background-color: salmon; padding: 3px 5px; border-radius: 3px;">&#10008;</span> Pending
+                                          </div>
+                                        {% endif %}
+                                      </td>                                 
+                                    </tr>
                             {% empty %}
                                 <tr>
                                     <td colspan="5">No orders available.</td>

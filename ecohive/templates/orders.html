@@ -54,13 +54,30 @@
                                       <br>
                                       {% endfor %}
                                   </td>
-                                  <td>{{ order.get_payment_status_display }}</td>
+                                  <td>
+                                    {% if order.payment_status == 'successful' %}
+                                      <div style="color: green; font-weight: bold;">
+                                        <span style="background-color: lightgreen; padding: 3px 5px; border-radius: 3px;">&#10004;</span> Paid
+                                      </div>
+                                    {% else %}
+                                      <div style="color: red; font-weight: bold;">
+                                        <span style="background-color: salmon; padding: 3px 5px; border-radius: 3px;">&#10008;</span> Pending
+                                      </div>
+                                    {% endif %}
+                                  </td>                                 
                                   <td>{{ order.total_price }}</td>
                                   <td>
-                                    <a href="{% url 'generate_pdf' order.id %}" target="_blank">
+                                    {% if order.payment_status == 'successful' %}
+                                      <a href="{% url 'generate_pdf' order.id %}" target="_blank">
                                         <i class="fas fa-download"></i>
-                                    </a>
-                                </td>
+                                      </a>
+                                    {% else %}
+                                      <!-- Disable the download button if payment status is not 'successful' -->
+                                      <button type="button" class="btn btn-disabled" disabled>
+                                        <i class="fas fa-download"></i>
+                                      </button>
+                                    {% endif %}
+                                  </td>
                               </tr>
                               {% endfor %}
                           </tbody>

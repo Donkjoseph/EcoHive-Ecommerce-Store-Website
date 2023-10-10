@@ -29,8 +29,18 @@
                             <td>RS {{ order_item.price }}</td>
                             <td>RS {{ order_item.total_price }}</td>
                             <td>{{ order_item.order.order_date }}</td>
-                            <td>{{ order_item.order.get_payment_status_display }}</td>
-                        </tr>
+                            <td>
+                                {% if order_item.order.payment_status == 'successful' %}
+                                  <div style="color: green; font-weight: bold;">
+                                    <span style="background-color: lightgreen; padding: 3px 5px; border-radius: 3px;">&#10004;</span> Paid
+                                  </div>
+                                {% else %}
+                                  <div style="color: red; font-weight: bold;">
+                                    <span style="background-color: salmon; padding: 3px 5px; border-radius: 3px;">&#10008;</span> Pending
+                                  </div>
+                                {% endif %}
+                              </td>                         
+                            </tr>
                     {% endfor %}
                 </tbody>
             </table>

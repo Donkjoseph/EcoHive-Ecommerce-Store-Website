@@ -144,9 +144,9 @@
 						<a href="{% url 'cart' %}" id="cartlink" >Go to Cart</a>
 						{% else %}
 						<button type="submit" class="add-to-cart-button" name="buy_now" >Add to Cart</button><br><br>
+						<button type="submit" class="add-to-cart-button" name="place_order">Buy Now</button>
 						{% endif %}
 					</form><br>
-					<button type="submit" class="add-to-cart-button" name="place_order">Buy Now</button>
 					{% if messages %}
 					{% for message in messages %}
 					<div class="alert alert-danger text-center" style="width: 50%;">{{ message }}</div>
