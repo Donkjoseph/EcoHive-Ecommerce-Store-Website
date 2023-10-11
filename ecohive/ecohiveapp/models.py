@@ -8,7 +8,6 @@ from django.dispatch import receiver
 from django.utils import timezone
 
 
-
 # Create your models here.
 
 
@@ -225,14 +224,6 @@ class OrderItem(models.Model):
         order = self.order
         order.total_order_price = sum(order_item.total_price for order_item in order.orderitem_set.all())
         order.save()
-class Review(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)  # Replace Product with your product model
-    rating = models.PositiveIntegerField(choices=[(1, '1 Star'), (2, '2 Stars'), (3, '3 Stars'), (4, '4 Stars'), (5, '5 Stars')])
-    review_text = models.TextField()
-
-    def __str__(self):
-        return f"Review by {self.user.username} for {self.product.product_name}"
     
 class Wishlist(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -244,3 +235,12 @@ class Wishlist(models.Model):
 
     def __str__(self):
         return f"{self.user.username}'s Wishlist Item - {self.product.product_name}"
+    
+class Review(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    rating = models.PositiveIntegerField()  # You can define the rating field according to your requirements (e.g., 1 to 5 stars)
+    comment = models.TextField(blank=True, null=True)  # Optional comment field
+
+    def __str__(self):
+        return f"Review for {self.product.product_name} by {self.user.username}"

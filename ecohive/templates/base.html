@@ -28,7 +28,7 @@
     <link rel="stylesheet" href="{% static 'css/flaticon.css' %}">
     <link rel="stylesheet" href="{% static 'css/icomoon.css' %}">
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
   </head>
   <style>
     .product {
@@ -158,6 +158,29 @@
     max-width: 1200px; /* Set your desired maximum width */
     margin: 0 auto; /* Center the container */
 }
+#star-rating ul {
+  display: flex;
+  gap: 15px;
+  list-style-type: none;
+  unicode-bidi: bidi-override;
+  direction: rtl;
+}
+
+li {
+  font-size: 50px;
+  cursor: pointer;
+  color: #34495e;
+  transition: all 0.5s ease;
+}
+
+li:hover, li.active {
+  color: #f1c40f;
+  transform: scale(1.2);
+}
+
+li:hover ~ li, li.active ~ li {
+  color: #f1c40f;
+}
 </style>
   <body class="goto-here">
 		<div class="py-1 bg-primary">
@@ -217,7 +240,7 @@
 			  </li>
 			  {% comment %} <li class="nav-item"><a href="{% url 'wishlist' %}" class="nav-link">Wishlist</a></li> {% endcomment %}
         <li class="nav-item"><a href="{% url 'shop' %}" id="top" class="nav-link">Shop</a></li>
-			  <li class="nav-item cta cta-colored"><a href="{% url 'cart' %}" class="nav-link"><span class="icon-shopping_cart"></span>[0]</a></li>
+			  <li class="nav-item cta cta-colored"><a href="{% url 'cart' %}" class="nav-link"><span class="icon-shopping_cart"></span>[{{ cart_item_count }}]</a></li>
 	  
 			  <!-- Added Login and Registration buttons -->
 			  {% if user.is_authenticated %}
@@ -278,27 +301,34 @@
                     success: function (data) {
                         var results = data.products;
                         var resultsHtml = '';
-                        resultsHtml += '<div class="product-container" style="display:flex; flex-wrap: wrap; gap:10px;">'; // Use flex-wrap to allow multiple rows
-
+                        resultsHtml += '<div class="container">';
+                          resultsHtml += '  <div class="row">';
+                          resultsHtml += '    <div class="col-12">';
+                          resultsHtml += '      <div class="product-container" style="display: flex; flex-wrap: wrap; gap: 10px;">';
+                          
                           if (results.length === 0) {
                               // If there are no results, insert a default image
-                              resultsHtml += '<div class="product-inf" style="flex-basis: calc(33.33% - 20px); text-align:center;">'; // Set width to 33.33% for each product in a row
-                              resultsHtml += '<img style="width: 100%;" src="{% static 'img/not-found.svg' %}" alt="Default Image">';
-                              resultsHtml += '<h3>No products found</h3>';
-                              resultsHtml += '</div>';
+                              resultsHtml += '        <div class="product-inf" style="flex-basis: calc(33.33% - 20px); text-align: center;">'; // Set width to 33.33% for each product in a row
+                              resultsHtml += '          <img style="width: 100%;" src="{% static 'img/not-found.svg' %}" alt="Default Image">';
+                              resultsHtml += '          <h3>No products found</h3>';
+                              resultsHtml += '        </div>';
                           } else {
                               for (var i = 0; i < results.length; i++) {
-                                  resultsHtml += '<div style="flex-basis: calc(33.33% - 20px); display: flex; flex-direction: column; align-items: center; text-align: center; margin-bottom: 20px;">'; // Set width to 33.33% for each product in a row
-                                  resultsHtml += '<a href="/product/' + results[i].prod_id + '/">';
-                                  resultsHtml += '<img style="width: 40%;" src="' + results[i].img + '" alt="' + results[i].name + '">';
-                                  resultsHtml += '</a>';
-                                  resultsHtml += '<a href="/product/' + results[i].prod_id + '/" class="text-truncate">' + results[i].name + '</a>';
-                                  resultsHtml += '<span class="text-truncate">' + results[i].price + '</span>';
-                                  resultsHtml += '</div>';
+                                  resultsHtml += '        <div style="flex-basis: calc(33.33% - 20px); display: flex; flex-direction: column; align-items: center; text-align: center; margin-bottom: 20px;">'; // Set width to 33.33% for each product in a row
+                                  resultsHtml += '          <a href="/product/' + results[i].prod_id + '/">';
+                                  resultsHtml += '            <img style="width: 40%;" src="' + results[i].img + '" alt="' + results[i].name + '">';
+                                  resultsHtml += '          </a>';
+                                  resultsHtml += '          <a href="/product/' + results[i].prod_id + '/" class="text-truncate">' + results[i].name + '</a>';
+                                  resultsHtml += '          <span class="text-truncate">' + results[i].price + '</span>';
+                                  resultsHtml += '        </div>';
                               }
                           }
                           
+                          resultsHtml += '      </div>';
+                          resultsHtml += '    </div>';
+                          resultsHtml += '  </div>';
                           resultsHtml += '</div>';
+                          
                           
             if (query) {
                 $('#search-results').html(resultsHtml);

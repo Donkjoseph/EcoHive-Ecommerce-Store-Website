@@ -27,6 +27,8 @@ from django.conf.urls.static import static
 urlpatterns = [
     path('admin/',admin.site.urls),
     path('', views.index, name='index'),
+    path('base/', views.base_view, name='base'),
+
     path('register.html', views.register, name='register'),
     # path('seller_register.html', views.seller_register, name='seller_register'),
     path('login.html', views.user_login, name='login'),
@@ -116,7 +118,9 @@ urlpatterns = [
 
 
     path('live_search/', views.live_search, name='live_search'),
+    path('submit_review/', views.submit_review, name='submit_review'),
 
+    # path('add_review/', views.add_review, name='add_review'),
 
 
 

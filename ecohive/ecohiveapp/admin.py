@@ -104,3 +104,13 @@ class WishlistAdmin(admin.ModelAdmin):
     search_fields = ('user__username', 'product__product_name')
 
 admin.site.register(Wishlist, WishlistAdmin)
+
+from .models import Review  # Import the Review model
+class ReviewAdmin(admin.ModelAdmin):
+    list_display = ['product', 'user', 'rating']
+    list_filter = ['product', 'user']
+    search_fields = ['product__product_name', 'user__username']
+    list_per_page = 20  # Number of items displayed per page in the admin list view
+
+# Register the Review model with the custom admin options
+admin.site.register(Review, ReviewAdmin)

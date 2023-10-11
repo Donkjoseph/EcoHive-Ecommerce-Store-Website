@@ -83,7 +83,48 @@
 	  opacity: 0.6; /* Reduce opacity for a faded look */
 	  pointer-events: none; /* Disable pointer events for this element */
   }
+  h2 {
+	font-size: 36px;
+}
 
+.scrollable-reviews {
+	max-height: 250px;
+	width: 800px;
+	overflow-y: scroll;
+	margin: 0 auto;
+	background-color: #fff;
+	box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+	margin-top: 20px;
+	margin-left: 0px;
+
+}
+
+.review {
+	border: 1px solid #ccc;
+	padding: 10px;
+	border-radius: 5px;
+}
+
+.head {
+	/* You can add any specific styling for the review header here */
+}
+
+.content {
+	/* You can add any specific styling for the review content here */
+}
+
+.name {
+	font-weight: bold;
+	color: #333;
+}
+
+.stars {
+	color: #ff9800;
+}
+
+.review-text {
+	color: #555;
+}
 </style>
  
 
@@ -151,11 +192,42 @@
 					{% for message in messages %}
 					<div class="alert alert-danger text-center" style="width: 50%;">{{ message }}</div>
 					{% endfor %}						
-				  {% endif %}
+				  {% endif %}		
 				</div>
 			</div>
+			<h2>User Ratings and Reviews</h2>
+		</header>
+		<div class="scrollable-reviews">
+			{% if reviews %}
+				{% for review in reviews %}
+					<div class="review">
+						<div class="head">
+							<img src="{{ review.user.userprofile.profile_pic.url }}" alt="{{ review.user.username }}'s Profile Image" width="50" class="rounded-image">
+						</div>						
+						<div class="content">
+							<span class="name">Review by {{ review.user.username }}</span>
+							<div class="stars">
+								{% for i in user_ratings %}
+									{% for j in "12345" %}
+										{% if j|add:0 <= i %}
+											<i class="fa fa-star fa-2x"></i>
+										{% else %}
+											<i class="fa fa-star-o fa-2x"></i>
+										{% endif %}
+									{% endfor %}
+								{% endfor %}
+							</div>
+							<p class="review-text">{{ review.comment }}</p>
+						</div>
+					</div>
+				{% endfor %}
+			{% else %}
+			<p class="review-text" style="margin-left:10px;"> No Reviews Available</p>
+			{% endif %}
+		</div>		
 		</div>
 	</section>
+	
 	<section class="ftco-section">
 		<div class="container">
 			<div class="row justify-content-center mb-3 pb-3">

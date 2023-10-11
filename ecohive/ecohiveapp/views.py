@@ -39,10 +39,20 @@ from .models import ProductSummary  # Import your ProductSummary model
 
 def index(request):
     products = Product.objects.all()
+    user_cart_items = Cart.objects.filter(user=request.user)
+    cart_item_count = user_cart_items.count()
+
     context = {
             'products': products,
+            'cart_item_count': cart_item_count,
         }  # Fetch all ProductSummary instances
     return render(request, 'index.html', context)
+
+def base_view(request):
+    user_cart_items = Cart.objects.filter(user=request.user)
+    cart_item_count = user_cart_items.count()
+
+    return render(request, 'base.html',{'cart_item_count': cart_item_count})
 
 def register(request):
     msg = None
@@ -528,6 +538,13 @@ def wishlist(request):
 def product_single(request, product_id):
     product = get_object_or_404(Product, pk=product_id)
     user = request.user
+    # product = Product.objects.get(pk=product_id)
+
+    # Retrieve reviews for the specific product
+    reviews = Review.objects.filter(product_id=product_id)
+    user_ratings = [review.rating for review in reviews]
+    # In your view
+    print(user_ratings)
 
     # Check if the product is already in the user's cart
     existing_cart_item = Cart.objects.filter(user=user, product=product).first()
@@ -568,6 +585,9 @@ def product_single(request, product_id):
         'related_products': related_products,
         'other_related_products': other_related_products,  # Pass other related products to the template
         'seller_address': seller_address,
+        'reviews': reviews,
+        'user_ratings': user_ratings,  # A list of user ratings.
+
 
     }
 
@@ -625,6 +645,7 @@ def cart_view(request):
 
     # Retrieve the user's cart items
     cart_items = Cart.objects.filter(user=user)
+    cart_item_count = cart_items.count()
 
     # Calculate the total price of items in the cart
     total_price = sum(cart_item.product.product_price * cart_item.quantity for cart_item in cart_items)
@@ -632,6 +653,7 @@ def cart_view(request):
     context = {
         'cart_items': cart_items,
         'total_price': total_price,
+        'cart_item_count': cart_item_count,
     }
 
     return render(request, 'cart.html', context)
@@ -942,3 +964,33 @@ def generate_pdf(request, order_id):
         return HttpResponse('Error generating PDF', status=500)
 
     return response
+
+from .models import Review
+
+def submit_review(request):
+    if request.method == "POST":
+        product_id = request.POST.get("product_id")
+        rating = request.POST.get("rating")
+        comment = request.POST.get("comment")
+        user = request.user
+        product = get_object_or_404(Product, id=product_id)
+
+        # Check if the user has already reviewed the product
+        existing_review = Review.objects.filter(product=product, user=user).first()
+
+        if existing_review:
+            # If the user has already reviewed, update the existing review
+            existing_review.rating = rating
+            existing_review.comment = comment
+            existing_review.save()
+        else:
+            # If the user hasn't reviewed, create a new review
+            review = Review(
+                product=product,
+                user=user,
+                rating=rating,
+                comment=comment
+            )
+            review.save()
+
+    return redirect("orders")
