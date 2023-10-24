@@ -41,7 +41,7 @@ INSTALLED_APPS = [
     'ecohiveapp',
     'django.contrib.sites', # must
     'allauth', # must
-    'allauth.account', # must
+    'allauth.account', #must
     'allauth.socialaccount', # must
     'allauth.socialaccount.providers.google', # new
 ]

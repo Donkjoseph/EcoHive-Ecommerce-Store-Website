@@ -240,8 +240,11 @@ li:hover ~ li, li.active ~ li {
 			  </li>
 			  {% comment %} <li class="nav-item"><a href="{% url 'wishlist' %}" class="nav-link">Wishlist</a></li> {% endcomment %}
         <li class="nav-item"><a href="{% url 'shop' %}" id="top" class="nav-link">Shop</a></li>
+        {% if user.is_authenticated %}
 			  <li class="nav-item cta cta-colored"><a href="{% url 'cart' %}" class="nav-link"><span class="icon-shopping_cart"></span>[{{ cart_item_count }}]</a></li>
-	  
+        {% else %}
+			  <li class="nav-item cta cta-colored"><a href="{% url 'cart' %}" class="nav-link"><span class="icon-shopping_cart"></span>[0]</a></li>
+        {% endif %}
 			  <!-- Added Login and Registration buttons -->
 			  {% if user.is_authenticated %}
 	<div class="navbar-collapse justify-content-end px-0" id="navbarNav">

@@ -39,20 +39,17 @@ from .models import ProductSummary  # Import your ProductSummary model
 
 def index(request):
     products = Product.objects.all()
-    user_cart_items = Cart.objects.filter(user=request.user)
-    cart_item_count = user_cart_items.count()
+    if request.user.is_authenticated:
+        user_cart_items = Cart.objects.filter(user=request.user)
+        cart_item_count = user_cart_items.count()
+    else:
+        cart_item_count = 0
 
     context = {
             'products': products,
             'cart_item_count': cart_item_count,
         }  # Fetch all ProductSummary instances
     return render(request, 'index.html', context)
-
-def base_view(request):
-    user_cart_items = Cart.objects.filter(user=request.user)
-    cart_item_count = user_cart_items.count()
-
-    return render(request, 'base.html',{'cart_item_count': cart_item_count})
 
 def register(request):
     msg = None
@@ -137,7 +134,7 @@ def dashseller(request):
         'existing_certification': existing_certification,
     })
 
-
+@login_required
 def dashlegal(request):
     # Retrieve Certification objects
     seller_applications = Certification.objects.all()
@@ -422,9 +419,9 @@ def profile(request):
 
         user_profile.save()
         request.user.save()
-        # messages.success(request, "Profile updated successfully")
+        messages.success(request, 'Profile updated successfully')
         return redirect('profile')
-    
+
     return render(request, 'userprofile/user_profile.html', {'user_profile': user_profile})
 
 
@@ -534,6 +531,8 @@ def wishlist(request):
     # Add your logic here
     return render(request, 'wishlist.html')
 
+from django.db.models import Avg
+
 @login_required
 def product_single(request, product_id):
     product = get_object_or_404(Product, pk=product_id)
@@ -544,7 +543,8 @@ def product_single(request, product_id):
     reviews = Review.objects.filter(product_id=product_id)
     user_ratings = [review.rating for review in reviews]
     # In your view
-    print(user_ratings)
+    average_rating = Review.objects.filter(product=product).aggregate(Avg('rating'))['rating__avg']
+    star_rating = convert_to_star_rating(average_rating)
 
     # Check if the product is already in the user's cart
     existing_cart_item = Cart.objects.filter(user=user, product=product).first()
@@ -586,7 +586,8 @@ def product_single(request, product_id):
         'other_related_products': other_related_products,  # Pass other related products to the template
         'seller_address': seller_address,
         'reviews': reviews,
-        'user_ratings': user_ratings,  # A list of user ratings.
+        'user_ratings': user_ratings,  
+        'average_rating': star_rating, # A list of user ratings.
 
 
     }
@@ -994,3 +995,10 @@ def submit_review(request):
             review.save()
 
     return redirect("orders")
+
+def convert_to_star_rating(average_rating):
+    if average_rating is not None:
+            star_rating = '★' * int(average_rating)
+            return star_rating
+    else:
+        return ""

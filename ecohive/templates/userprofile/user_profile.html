@@ -6,9 +6,19 @@
         <link href="{% static 'css/open-iconic-bootstrap.min.css' %}" rel="stylesheet">
         <link href="{% static 'css/userpro.css' %}" rel="stylesheet">
         <link href="{% static 'css/animate.min.css' %}" rel="stylesheet">
-       
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
     <!-- Template Stylesheet -->
 </head>
+<style>
+    .custom-toast-class {
+        background-color: rgba(0, 128, 0, 1);  color:white; /* Text color */
+      border-radius: 8px; /* Border radius */
+      max-width: 250px;
+      opacity: 1 !important;
+      
+    
+    }
+</style>
 <body>
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
         <div class="container">
@@ -117,9 +127,18 @@
                     
                 </div>
     </form>
+    {% if messages %}
+    <div class="toast">
+        <div class="toast-header">
+            <strong class="mr-auto">Message</strong>
+        </div>
+        <div class="toast-body">
+            {% for message in messages %}
+                {{ message }}
+            {% endfor %}
+        </div>
     </div>
-    <div class="col-md-8">
-        <!-- Other content related to user profile -->
-    </div>
+{% endif %} 
+</div>
 </div>
 </body>

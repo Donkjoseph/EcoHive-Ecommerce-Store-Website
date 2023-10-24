@@ -125,6 +125,18 @@
 .review-text {
 	color: #555;
 }
+.star-rating {
+    font-size: 60px; /* Adjust the font size as needed */
+    margin-left: 25px;
+    transition: color 0.3s; /* Smooth transition for color change */
+
+    /* Define your star color and any other desired properties */
+    color: #ff9800;
+}
+
+.star-rating:hover {
+    color: #fddb27; /* New color on hover (you can customize this) */
+}
 </style>
  
 
@@ -155,7 +167,9 @@
 					<strong>Seller's Address:</strong>
 					<p>{{ seller_address }}</p>				
 					<h5>Total Stock: {{ product.product_stock }} KG left</h5>
-					<!-- Add to cart button or other actions as needed -->
+					{% if average_rating %}
+					<span class="star-rating">{{ average_rating }}</span>
+				{% endif %}					<!-- Add to cart button or other actions as needed -->
 					<form method="post">
 						{% csrf_token %}
 						<div class="input-group col-md-6 d-flex mb-3">
@@ -181,11 +195,9 @@
 						</div>
 						{% if is_in_cart %}
 						<p style="margin-left:20px;"> Product is already in your cart </p>
-						<button type="submit" class="add-to-cart-button" name="place_order">Buy Now</button>
 						<a href="{% url 'cart' %}" id="cartlink" >Go to Cart</a>
 						{% else %}
 						<button type="submit" class="add-to-cart-button" name="buy_now" >Add to Cart</button><br><br>
-						<button type="submit" class="add-to-cart-button" name="place_order">Buy Now</button>
 						{% endif %}
 					</form><br>
 					{% if messages %}
@@ -207,15 +219,36 @@
 						<div class="content">
 							<span class="name">Review by {{ review.user.username }}</span>
 							<div class="stars">
-								{% for i in user_ratings %}
-									{% for j in "12345" %}
-										{% if j|add:0 <= i %}
-											<i class="fa fa-star fa-2x"></i>
-										{% else %}
-											<i class="fa fa-star-o fa-2x"></i>
-										{% endif %}
-									{% endfor %}
-								{% endfor %}
+								{% if review.rating == 5 %}
+								<small class="fa fa-star text-success mr-1"></small>
+								<small class="fa fa-star text-success mr-1"></small>
+								<small class="fa fa-star text-success mr-1"></small>
+								<small class="fa fa-star text-success mr-1"></small>
+								<small class="fa fa-star text-success mr-1"></small>
+								{% elif review.rating == 4 %}
+								<small class="fa fa-star text-success mr-1"></small>
+								<small class="fa fa-star text-success mr-1"></small>
+								<small class="fa fa-star text-success mr-1"></small>
+								<small class="fa fa-star text-success mr-1"></small>
+								<small class="fa fa-star text-secondary mr-1"></small>
+								{% elif review.rating == 3 %}
+								<small class="fa fa-star text-success mr-1"></small>
+								<small class="fa fa-star text-success mr-1"></small>
+								<small class="fa fa-star text-success mr-1"></small>
+								<small class="fa fa-star text-secondary mr-1"></small>
+								<small class="fa fa-star text-secondary mr-1"></small>
+								{% elif review.rating == 2 %}
+								<small class="fa fa-star text-danger mr-1"></small>
+								<small class="fa fa-star text-danger mr-1"></small>
+								<small class="fa fa-star text-secondary mr-1"></small>
+								<small class="fa fa-star text-secondary mr-1"></small>
+								<small class="fa fa-star text-secondary mr-1"></small>
+								{% elif review.rating <= 1 %} <small class="fa fa-star text-danger mr-1"></small>
+								<small class="fa fa-star text-secondary mr-1"></small>
+								<small class="fa fa-star text-secondary mr-1"></small>
+								<small class="fa fa-star text-secondary mr-1"></small>
+								<small class="fa fa-star text-secondary mr-1"></small>
+								{% endif %}
 							</div>
 							<p class="review-text">{{ review.comment }}</p>
 						</div>
