@@ -121,6 +121,11 @@ def dashseller(request):
             certification = form.save(commit=False)
             certification.user = request.user
             certification.save()
+            subject = 'Your Certification Details has been sent to Legal Advisor'
+            message = 'Your Request for certification details has been sent to the Legal Advisor and pednding '
+            from_email = settings.EMAIL_HOST_USER  # Your sender email address
+            recipient_list = [certification.user.email]
+            send_mail(subject, message, from_email,recipient_list)
             print("Certification saved successfully")  # Debug statement
             return redirect('successseller')  # Redirect to a success page
         else:
@@ -183,7 +188,7 @@ import json
 @login_required
 def admindash(request):
     # Calculate the total number of users
-    total_users = User.objects.count()
+    # total_users = User.objects.count()
 
     # Calculate the number of products added
     total_products = Product.objects.count()
@@ -199,7 +204,7 @@ def admindash(request):
     order_data = [total_orders]
 
     context = {
-        'total_users': total_users,
+        # 'total_users': total_users,
         'total_products': total_products,
         'total_certified_users': total_certified_users,
         'total_orders': total_orders,
@@ -626,12 +631,12 @@ def category_vegetables(request):
 def category_fruits(request):
     fruits_category = Category.objects.get(category_name='Fruits')
     fruit_products = Product.objects.filter(category=fruits_category)
-
+    
     # Pass the filtered products to the template
     context = {
         'category_products': {'Fruits': fruit_products},
     }
-
+    
     return render(request, 'category_fruits.html', context)
 
 
@@ -880,17 +885,44 @@ def paymenthandler(request):
 
     return HttpResponseBadRequest("Invalid request method")
 
+import qrcode
+import base64
+import urllib.parse
+from io import BytesIO
 
 @login_required
 def orders(request):
     # Retrieve orders for the currently logged-in user
+    order_items = []
+
     user_orders = Order.objects.filter(user=request.user)
-    
+
+    for order in user_orders:
+        for item in order.orderitem_set.all():
+            qr = qrcode.QRCode(
+                version=1,
+                error_correction=qrcode.constants.ERROR_CORRECT_L,
+                box_size=10,
+                border=4,
+            )
+            print(order.id)
+            print(item.product.product_name)
+            print(order.user)
+            qr.add_data(f'Order ID: {order.id}\nProduct: {item.product.product_name}\nUser: {order.user}\n')
+            qr.make(fit=True)
+            qr_img = qr.make_image(fill_color="black", back_color="white")
+
+            buffered = BytesIO()
+            qr_img.save(buffered, format="PNG")
+            item.qr_code_data = base64.b64encode(buffered.getvalue()).decode("utf-8")
+
     context = {
         'orders': user_orders,
+        'order_items': order_items,
     }
     
     return render(request, 'orders.html', context)
+
 
 def view_orders(request):
     all_orders = Order.objects.all()
@@ -1002,3 +1034,115 @@ def convert_to_star_rating(average_rating):
             return star_rating
     else:
         return ""
+
+#Main Project
+
+# from .models import DeliveryAgent
+
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import User  # Import the User model
+from .models import DeliveryAgent
+
+
+from ecohiveapp.models import User, DeliveryAgent
+
+def regdelivery(request):
+    if request.method == 'POST':
+        # Retrieve data from the form
+        name = request.POST.get('name')
+        username = request.POST.get('username')
+        email = request.POST.get('email')
+        phone = request.POST.get('phone')
+        license_number = request.POST.get('license')
+        vechicle_type = request.POST.get('vechicle_type')
+        location = request.POST.get('location')
+        password = request.POST.get('password')
+
+        # Use the custom manager to create a new user
+        user = User.objects.create_user(
+            username=username,
+            email=email,
+            password=password,
+        )
+
+        # Create a new DeliveryAgent instance with 'pending' status
+        delivery_agent = DeliveryAgent.objects.create(
+            user=user,  # Associate the DeliveryAgent with the user
+            name=name,
+            username=username,
+            email=email,
+            phone=phone,
+            license_number=license_number,
+            vechicle_type=vechicle_type,
+            location=location,
+            status='pending',  # Set the status to 'pending'
+        )
+
+        # Redirect to a success page or do other actions as needed
+        return redirect('login')
+
+    return render(request, 'regdelivery.html')
+
+
+
+def deliveryagent(request):
+    delivery_agents = DeliveryAgent.objects.all()
+    return render(request, 'admindash/deliveryagent.html', {'delivery_agents': delivery_agents})
+
+from django.views.decorators.http import require_POST  # Import require_POST decorator
+@require_POST
+def approve_delivery_agent(request, agent_id):
+    delivery_agent = get_object_or_404(DeliveryAgent, id=agent_id)
+    delivery_agent.status = 'approved'
+    delivery_agent.save()
+    return redirect('deliveryagent')  # Redirect to a success page
+
+@require_POST
+def reject_delivery_agent(request, agent_id):
+    delivery_agent = get_object_or_404(DeliveryAgent, id=agent_id)
+    delivery_agent.status = 'rejected'
+    delivery_agent.save()
+    return redirect('deliveryagent') 
+
+def deliverylogin(request):
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+
+        # Authenticate the user
+        user = authenticate(request, username=username, password=password)
+
+        if user is not None and user.delivery_agent.is_approved():
+            # Login the user
+            login(request, user)
+            return redirect('deliverydetails')  # Redirect to the delivery agent dashboard
+        else:
+            messages.error(request, 'Invalid login or account not approved.')
+
+    return render(request, 'deliverylogin.html')  # Update the template name
+
+
+@login_required
+def deliverydetails(request):
+    if request.method == 'POST':
+        availability = request.POST.get('availability', None)
+
+        if availability in ['available', 'not_available']:
+            request.user.delivery_agent.availability = availability
+            request.user.delivery_agent.save()
+            messages.success(request, 'Availability status updated successfully.')
+        else:
+            messages.error(request, 'Invalid availability status.')
+
+        return redirect('deliverydetails')
+
+    return render(request, 'delivery/deliverydetails.html')
+
+def delivery_agents(request):
+    # Retrieve all delivery agents from the database
+    delivery_agents = DeliveryAgent.objects.all()
+
+    # Pass the delivery agents to the template context
+    context = {'delivery_agents': delivery_agents}
+    
+    return render(request, 'sellerdash/delivery_agents.html', context)

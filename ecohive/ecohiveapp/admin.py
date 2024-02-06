@@ -95,6 +95,17 @@ class OrderItemAdmin(admin.ModelAdmin):
     list_display = ('order', 'product', 'seller', 'quantity', 'price', 'total_price')
     list_filter = ('order', 'product', 'seller')
     search_fields = ('order__user__username', 'product__product_name', 'seller__username')
+    readonly_fields = ['qr_code']  # Assuming you want the QR code to be read-only
+
+    fieldsets = (
+        (None, {
+            'fields': ('order', 'product', 'seller', 'quantity', 'price', 'total_price')
+        }),
+        ('QR Code', {
+            'fields': ('qr_code',),
+        }),
+    )
+
 
 from .models import Wishlist
 
@@ -114,3 +125,15 @@ class ReviewAdmin(admin.ModelAdmin):
 
 # Register the Review model with the custom admin options
 admin.site.register(Review, ReviewAdmin)
+
+#Main Project
+from django.contrib import admin
+from .models import DeliveryAgent
+
+class DeliveryAgentAdmin(admin.ModelAdmin):
+    list_display = ('name', 'username', 'email', 'phone', 'license_number', 'status', 'availability')
+    search_fields = ('name', 'username', 'email', 'phone', 'license_number')
+    list_filter = ('status', 'availability')
+    readonly_fields = ('user',)  # Assuming you don't want to edit the user field in the admin
+
+admin.site.register(DeliveryAgent, DeliveryAgentAdmin)

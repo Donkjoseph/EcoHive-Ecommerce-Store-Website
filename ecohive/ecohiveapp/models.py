@@ -6,7 +6,14 @@ from django.core.exceptions import ValidationError
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.utils import timezone
-
+import qrcode
+from io import BytesIO
+from django.core.files.base import ContentFile
+from django.db.models.signals import pre_save
+from django.dispatch import receiver
+from django.core.mail import send_mail
+from django.db import IntegrityError
+from django.db import transaction
 
 # Create your models here.
 
@@ -16,6 +23,7 @@ class User(AbstractUser):
     is_customer = models.BooleanField('Is customer', default=False)
     is_seller = models.BooleanField('Is seller', default=False)
     is_legaladvisor= models.BooleanField('Is advisor', default=False)
+    
     
     groups = models.ManyToManyField(
         'auth.Group',
@@ -80,6 +88,7 @@ class Certification(models.Model):
         choices=APPROVAL_CHOICES,
         default=PENDING,
     )
+    
 class Seller(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     certification = models.ForeignKey(Certification, on_delete=models.CASCADE,default=1)
@@ -207,23 +216,71 @@ class Order(models.Model):
         max_length=20, choices=PaymentStatusChoices.choices, default=PaymentStatusChoices.PENDING)
     def _str_(self):
         return self.user.username 
+    
 class OrderItem(models.Model):
     order = models.ForeignKey(Order, on_delete=models.CASCADE)
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     seller = models.ForeignKey(Seller, on_delete=models.CASCADE)  # Assuming the seller is also a User
     quantity = models.PositiveIntegerField()
+    qr_code = models.ImageField(upload_to='qr_codes/', blank=True, null=True)
     price = models.DecimalField(max_digits=10, decimal_places=2)
     total_price = models.DecimalField(max_digits=10, decimal_places=2)
 
+    def generate_qr_code(self):
+        # Check if QR code already exists
+        if not self.qr_code:
+            # Generate QR code data based on order item information
+            qr_code_data = f"OrderItem ID: {self.id}, Product: {self.product.product_name}, Quantity: {self.quantity}"
+
+            # Create a QR code instance
+            qr = qrcode.QRCode(
+                version=1,
+                error_correction=qrcode.constants.ERROR_CORRECT_L,
+                box_size=10,
+                border=4,
+            )
+            qr.add_data(qr_code_data)
+            qr.make(fit=True)
+
+            # Create an image from the QR code
+            img = qr.make_image(fill_color="black", back_color="white")
+
+            # Save the image to a BytesIO buffer
+            buffer = BytesIO()
+            img.save(buffer, format="PNG")
+            buffer.seek(0)
+
+            # Save the QR code image to a file
+            image_name = f"order_item_{self.id}_qr_code.png"
+            self.qr_code.save(image_name, ContentFile(buffer.read()), save=True)
+
+            
     def save(self, *args, **kwargs):
-        # Calculate the total price for this order item based on quantity and price
-        self.total_price = self.quantity * self.price
-        super(OrderItem, self).save(*args, **kwargs)
-        
-        # Update the total order price in the associated Order model
-        order = self.order
-        order.total_order_price = sum(order_item.total_price for order_item in order.orderitem_set.all())
-        order.save()
+            # Calculate the total price for this order item based on quantity and price
+            self.total_price = self.quantity * self.price
+            self.generate_qr_code()
+
+            try:
+                # Save the instance and handle IntegrityError for unique constraint on id
+                with transaction.atomic():
+                    super(OrderItem, self).save(*args, **kwargs)
+
+                    # Update the total order price in the associated Order model
+                    order = self.order
+                    order.total_price = sum(order_item.total_price for order_item in order.orderitem_set.all())
+                    order.save()
+
+            except IntegrityError:
+                # Handle IntegrityError, possibly due to concurrent saves
+                # You can log the error or take appropriate action based on your requirements
+                pass
+    
+@receiver(pre_save, sender=OrderItem)
+def order_item_pre_save(sender, instance: OrderItem, **kwargs):
+    instance.generate_qr_code()  
+
+pre_save.disconnect(order_item_pre_save, sender=OrderItem)  
+    
     
 class Wishlist(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -244,3 +301,37 @@ class Review(models.Model):
 
     def __str__(self):
         return f"Review for {self.product.product_name} by {self.user.username}"
+    
+    
+#Main Project
+
+class DeliveryAgent(models.Model):
+    STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('approved', 'Approved'),
+        ('rejected', 'Rejected'),
+    ]
+    
+    AVAILABILITY_CHOICES = [
+        ('available', 'Available'),
+        ('not_available', 'Not Available'),
+    ]
+    
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='delivery_agent')
+    name = models.CharField(max_length=255)
+    username = models.CharField(max_length=30, unique=True)  # Added username field
+    email = models.EmailField(unique=True)
+    phone = models.CharField(max_length=15)
+    license_number = models.CharField(max_length=20,unique=True)
+    vechicle_type = models.CharField(max_length=255,default=1)
+    location = models.CharField(max_length=255)
+    password = models.CharField(max_length=255)
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='pending')
+    availability = models.CharField(max_length=15, choices=AVAILABILITY_CHOICES, default='not_available')
+
+
+    def __str__(self):
+        return self.name
+    
+    def is_approved(self):
+        return self.status == 'approved'

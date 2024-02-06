@@ -77,7 +77,7 @@
                                   <input type="hidden" name="action" value="{% if user.is_active %}deactivate{% else %}activate{% endif %}">
                                   <button type="submit" class="btn {% if user.is_active %}btn-danger{% else %}btn-success{% endif %}">
                                       {% if user.is_active %}
-                                          Deactivate
+                                      Inactive
                                       {% else %}
                                           Activate
                                       {% endif %}

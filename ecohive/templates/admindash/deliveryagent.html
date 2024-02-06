@@ -1,0 +1,85 @@
+{% extends 'admindash/base.html' %}
+{% load static %}
+{% block content %}
+
+<div class="container-fluid">
+    <div class="card">
+        <div class="card-body">
+            <div class="container mt-4">
+                <h2 class="text-center mb-4">All Delivery Agents</h2>
+
+                {% for delivery_agent in delivery_agents %}
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h2 class="card-title text-center mb-4">Delivery Agent Details</h2>
+                        <div id="map_{{ delivery_agent.id }}" style="height: 300px;"></div>
+
+                        <ul class="list-group">
+                            <li class="list-group-item"><strong>Name:</strong> {{ delivery_agent.name }}</li>
+                            <li class="list-group-item"><strong>Username:</strong> {{ delivery_agent.username }}</li>
+                            <li class="list-group-item"><strong>Email:</strong> {{ delivery_agent.email }}</li>
+                            <li class="list-group-item"><strong>Phone:</strong> {{ delivery_agent.phone }}</li>
+                            <li class="list-group-item"><strong>License Number:</strong> {{ delivery_agent.license_number }}</li>
+                            <li class="list-group-item"><strong>Location:</strong> {{ delivery_agent.location }}</li>
+                            <li class="list-group-item"><strong>Status:</strong> {{ delivery_agent.status }}</li>
+                        </ul>
+
+                        {% if delivery_agent.status == 'pending' %}
+                        <form method="post" action="{% url 'approve_delivery_agent' delivery_agent.id %}" style="display: inline;">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-success btn-approve">Approve</button>
+                        </form>
+
+                        <form method="post" action="{% url 'reject_delivery_agent' delivery_agent.id %}" style="display: inline;">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-danger btn-reject">Reject</button>
+                        </form>
+                        {% endif %}
+
+                        {% if delivery_agent.status == 'approved' %}
+                        <div class="alert alert-success mt-3" role="alert">
+                            This delivery agent has been approved!
+                        </div>
+                        {% endif %}
+
+                        {% if delivery_agent.status == 'rejected' %}
+                        <div class="alert alert-danger mt-3" role="alert">
+                            This delivery agent has been rejected!
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+
+                <!-- Add Bootstrap JS and Popper.js scripts (required for Bootstrap components) -->
+                <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+            </div>
+
+        </div>
+    </div>
+</div>
+<!-- JavaScript to initialize the map for each delivery agent -->
+{% for delivery_agent in delivery_agents %}
+<script>
+    // Split the location string into latitude and longitude
+    var locationArray = "{{ delivery_agent.location }}".split(',');
+
+    // Check if both latitude and longitude are available
+    if (locationArray.length === 2) {
+        var map_{{ delivery_agent.id }} = L.map('map_{{ delivery_agent.id }}').setView([0, 0], 13);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(map_{{ delivery_agent.id }});
+
+        // Add a marker for the delivery agent's location
+        L.marker(locationArray).addTo(map_{{ delivery_agent.id }}).bindPopup("{{ delivery_agent.name }}'s Location");
+    } else {
+        // Handle the case where location data is not available or not in the correct format
+        console.error("Invalid location data for {{ delivery_agent.name }}");
+    }
+</script>
+{% endfor %}
+
+
+{% endblock %}

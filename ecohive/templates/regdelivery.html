@@ -1,0 +1,217 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Delivery Agent Registration</title>
+    <!-- Add Bootstrap CSS link -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+
+        form {
+            max-width: 400px;
+            margin: 0 auto;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        input {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 12px;
+            box-sizing: border-box;
+        }
+
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+        .error-message {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container mt-5">
+        <div class="card">
+            <div class="card-body">
+                <h2 class="card-title text-center mb-4">Delivery Agent Registration</h2>
+
+                <form method="post" onsubmit="return validateForm()">
+                    {% csrf_token %}
+
+                    <div class="mb-3">
+                        <label for="name" class="form-label">Name:</label>
+                        <input type="text" class="form-control" id="name" name="name" required>
+                        <div id="name-error" class="error-message"></div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="username" class="form-label">Username:</label>
+                        <input type="text" class="form-control" id="username" name="username" required>
+                        <div id="username-error" class="error-message"></div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Email:</label>
+                        <input type="email" class="form-control" id="email" name="email" required>
+                        <div id="email-error" class="error-message"></div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="phone" class="form-label">Phone Number:</label>
+                        <input type="tel" class="form-control" id="phone" name="phone" required>
+                        <div id="phone-error" class="error-message"></div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="license" class="form-label">Driver's License Number:</label>
+                        <input type="text" class="form-control" id="license" name="license" required>
+                        <div id="license-error" class="error-message"></div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="vehicle_type" class="form-label">Vehicle Type:</label>
+                        <select class="form-select" id="vehicle_type" name="vehicle_type" required>
+                            <option value="bike">Bike</option>
+                            <option value="car">Car</option>
+                        </select>
+                        <div id="vehicle_type-error" class="error-message"></div>
+                    </div>                    
+
+                    <div class="mb-3">
+                        <label for="location" class="form-label">Location:</label>
+                        <input type="text" class="form-control" id="location" name="location" readonly>
+                        <button type="button" class="btn btn-primary" onclick="getLocation()">Get Location</button>
+                        <div id="location-error" class="error-message"></div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Password:</label>
+                        <input type="password" class="form-control" id="password" name="password" required>
+                        <div id="password-error" class="error-message"></div>
+                    </div>
+
+                    <button type="submit" class="btn btn-success">Register</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Bootstrap JS and Popper.js scripts (required for Bootstrap components) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        function getLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(showPosition);
+            } else {
+                alert("Geolocation is not supported by this browser.");
+            }
+        }
+
+        function showPosition(position) {
+            const latitude = position.coords.latitude;
+            const longitude = position.coords.longitude;
+            const locationInput = document.getElementById("location");
+
+            locationInput.value = `Latitude: ${latitude}, Longitude: ${longitude}`;
+        }
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const form = document.querySelector('form');
+    
+            form.addEventListener('submit', function (event) {
+                if (!validateForm()) {
+                    event.preventDefault();
+                }
+            });
+    
+            function validateForm() {
+                let isValid = true;
+    
+                const nameInput = document.getElementById('name');
+                const usernameInput = document.getElementById('username');
+                const emailInput = document.getElementById('email');
+                const phoneInput = document.getElementById('phone');
+                const licenseInput = document.getElementById('license');
+                const passwordInput = document.getElementById('password');
+                const vehicleTypeInput = document.getElementById('vehicle_type');
+                const locationInput = document.getElementById('location');
+    
+                isValid = validateField(nameInput, 'text') && isValid;
+                isValid = validateField(usernameInput, 'text') && isValid;
+                isValid = validateField(emailInput, 'email') && isValid;
+                isValid = validateField(phoneInput, 'phone') && isValid;
+                isValid = validateField(licenseInput, 'text') && isValid;
+                isValid = validateField(passwordInput, 'text') && isValid;
+                isValid = validateField(vehicleTypeInput, 'text') && isValid;
+                isValid = validateField(locationInput, 'text') && isValid;
+    
+                return isValid;
+            }
+    
+            function validateField(input, type = 'text') {
+                const value = input.value.trim();
+                const errorMessage = document.getElementById(`${input.id}-error`);
+    
+                if (value === '') {
+                    displayError(errorMessage, `${input.placeholder} is required.`);
+                    return false;
+                }
+    
+                if (type === 'email' && !isValidEmail(value)) {
+                    displayError(errorMessage, 'Invalid email format.');
+                    return false;
+                }
+    
+                if (type === 'phone' && !isValidPhoneNumber(value)) {
+                    displayError(errorMessage, 'Invalid phone number format.');
+                    return false;
+                }
+    
+                clearError(errorMessage);
+                return true;
+            }
+    
+            function isValidEmail(email) {
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                return emailRegex.test(email);
+            }
+    
+            function isValidPhoneNumber(phone) {
+                const phoneRegex = /^\d{10}$/;
+                return phoneRegex.test(phone);
+            }
+    
+            function displayError(element, message) {
+                element.textContent = message;
+                element.style.color = 'red';
+            }
+    
+            function clearError(element) {
+                element.textContent = '';
+            }
+        });
+    </script>
+</body>
+</html>

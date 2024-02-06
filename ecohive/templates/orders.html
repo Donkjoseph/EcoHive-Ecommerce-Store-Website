@@ -1,6 +1,7 @@
 {%extends 'base.html'%}
 {% load static %}
 {%block content%}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.3/js/lightbox.min.js" integrity="sha384-zIBLXzhgWq2gLMp5g8foP2zxzTNfn7eCwCF3j1xnnps5BsK9b9eZEhlKFGLUZdeI" crossorigin="anonymous"></script>
     <div class="hero-wrap hero-bread"style="background-image: url({% static 'images/bg_1.jpg' %});">
         <div class="container">
           <div class="row no-gutters slider-text align-items-center justify-content-center">
@@ -12,6 +13,11 @@
         </div>
       </div>        <!-- ... Hero section content ... -->
     </div>
+      <!-- Review Modal -->
+  <div class="overlay2" id="overlay2">
+    <!-- Add this modal to your HTML template -->
+   
+  </div>
     <!-- Add a section for displaying order details -->
     <section class="ftco-section ftco-cart">
       <div class="container">
@@ -29,6 +35,8 @@
                               <th>Status</th>
                               <th>Total Paid Amount</th>
                               <th>Download Invoice</th>
+                              <th>Qr Code</th>
+                              {% comment %} <th>Received Product</th> <!-- Add this line for the new button --> {% endcomment %}
                               <th>Add Review</th>
                           </tr>
                       </thead>
@@ -66,6 +74,19 @@
                                           {% endif %}
                                       </td>
                                       <td>
+                                        <a href="#" class="openQrCodeModal" 
+   data-bs-toggle="modal"
+   data-bs-target="#qrCodeModal"
+   data-order-id="{{ item.id }}"
+   data-qr-code-data="{{ item.total_price }}"
+   data-qr-code-url="{{ item.qr_code.url }}">
+   <img class="QrCodeModal" src="{{ item.qr_code.url }}" alt="QR Code" width="150px" height="150px">
+</a>
+                                    </td>
+                                      {% comment %} <td>
+                                        <button type="button" class="btn btn-primary" onclick="markAsReceived( {{ order.id }}, {{ item.product.id }} )">Received Product</button>
+                                    </td> {% endcomment %}
+                                      <td>
                                           <button type="button" class="btn btn-outline" onclick="showReviewModal( {{ item.product.id }})">Review product</button>
                                       </td>
                                   </tr>
@@ -78,7 +99,6 @@
           </div>
       </div>
   </section>
-  <!-- Review Modal -->
 <div class="modal fade" id="reviewModal" tabindex="-1" role="dialog" aria-labelledby="reviewModalLabel" aria-hidden="true">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
@@ -126,6 +146,52 @@
   </div>
 </div>
   <script>
+    $(document).ready(function () {
+        $('.openQrCodeModal').on('click', function () {
+            console.log("Ok")
+            console.log("Helo")
+            // Get the data attributes
+            var orderId = $(this).data('order-id');
+            console.log(orderId);
+            
+            var qrCodeData = $(this).data('qr-code-data');
+            console.log(qrCodeData);
+            
+            var qrCodeUrl = $(this).data('qr-code-url');
+            console.log(qrCodeUrl);
+           
+            // Dynamically generate the modal HTML
+            var modalHtml = `
+                <div class="modal fade" id="qrCodeModal" tabindex="-1" aria-labelledby="qrCodeModalLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="qrCodeModalLabel">Zoomed QR Code</h5>
+                               
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close" style="height:50px;width:50px;">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                                {% comment %} <button type="button" class="btn-close" data-bs-dismiss="modal" style="height:50px;width:50px;" aria-label="Close"></button> {% endcomment %}
+                            </div>
+                            <div class="modal-body text-center">
+                                <img class="qr-code-image-zoomed" src="${qrCodeUrl}" alt="Zoomed QR Code">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            // Append the modal HTML to the body
+            $('body').append(modalHtml);
+
+            // Show the modal
+            $('#qrCodeModal').modal('show');
+
+            // Prevent the default link behavior (optional)
+            return false;
+        });
+    });
+
     // Function to show the modal and set the product ID
     function showReviewModal(productId) {
       // Set the product ID in a hidden input field in the modal form
@@ -183,6 +249,7 @@ function handleClick(e) {
 
 
   </script>
+ 
   <style>
     /* Add your custom CSS styles here */
     body {

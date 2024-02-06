@@ -18,6 +18,10 @@
       <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.5.2/dist/js/bootstrap.bundle.min.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+
+    <!-- Add Leaflet JavaScript -->
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
 </head>
 <style>
     
@@ -243,11 +247,6 @@ textarea:focus {
 
               </a>
             </li>
-            <li class="sidebar-item">
-              <a class="sidebar-link" href="{% url 'index' %}" aria-expanded="false">
-                <span class="icon-user"><i class="fas fa-home"> Home Page</i></span>
-              </a>
-            </li>
             <li class="nav-small-cap">
               <i class="ti ti-dots nav-small-cap-icon fs-4"></i>
               <span class="hide-menu">ADMIN FUNCTIONALITIES</span>
@@ -283,6 +282,11 @@ textarea:focus {
               <span class="icon-user"><i class="fas fa-eye"> View Orders</i></span>
             </a>
         </li> 
+        <li class="sidebar-item">
+          <a class="sidebar-link" href="{% url 'deliveryagent' %}" aria-expanded="false">
+            <span class="icon-user"><i class="fas fa-eye"> Delivery Agent</i></span>
+          </a>
+      </li> 
           </ul>
         </nav>
         <!-- End Sidebar navigation -->
@@ -302,12 +306,16 @@ textarea:focus {
               </a>
             </li>
             <li class="nav-item">
-              <a class="nav-link nav-icon-hover" href="javascript:void(0)">
-                <i class="ti ti-bell-ringing"></i>
-                <div class="notification bg-primary rounded-circle"></div>
+              <a class="nav-link nav-icon-hover" href="javascript:void(0)" id="notificationBtn">
+                  <i class="ti ti-bell-ringing"></i>
+                  <div class="notification bg-primary rounded-circle"></div>
               </a>
-            </li>
+          </li>
           </ul>
+          <div id="notificationScreen" class="notification-screen">
+            <!-- Messages will be displayed here -->
+            <ul id="notificationList"></ul>
+        </div>
           <div class="navbar-collapse justify-content-end px-0" id="navbarNav">
             <ul class="navbar-nav flex-row ms-auto align-items-center justify-content-end">
               <p class="me-3">Welcome, {{ user.username }}</p>

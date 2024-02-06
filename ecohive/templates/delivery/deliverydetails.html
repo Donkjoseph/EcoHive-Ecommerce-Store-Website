@@ -1,0 +1,72 @@
+{% extends 'delivery/base.html' %}
+{% load static %}
+
+{% block content %}
+
+<styles>
+    /* Add this CSS to improve the appearance */
+body {
+    background-color: #f8f9fa;
+}
+
+.container {
+    margin-top: 50px;
+}
+
+.card {
+    width: 50%;
+    margin: auto;
+}
+
+/* Optional: Add more custom styles as needed */
+
+</style>
+<div class="container">
+    <div class="card mt-5">
+        <div class="card-body">
+            <h2 class="card-title">Update Availability Status</h2>
+
+            {% if user.is_authenticated %}
+                <p class="card-text">Welcome, {{ user.username }}!</p>
+                <p class="card-text">Current Availability: 
+                    {% if user.delivery_agent.availability == 'available' %}
+                        <span class="badge badge-success">Available</span>
+                    {% else %}
+                        <span class="badge badge-warning">Not Available</span>
+                    {% endif %}
+                </p>
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="alert alert-info">{{ message }}</div>
+                    {% endfor %}
+                {% endif %}
+                
+                <form method="post" action="{% url 'deliverydetails' %}">
+                    {% csrf_token %}
+                    
+                    <div class="form-group">
+                        <label for="availability">Availability:</label>
+                        <select class="form-control" name="availability" id="availability">
+                            <option value="available">Available</option>
+                            <option value="not_available">Not Available</option>
+                        </select>
+                    </div>
+        
+                    <button type="submit" class="btn btn-primary">Update Availability</button>
+                </form>
+            
+            {% else %}
+                <p class="card-text">You need to be logged in to update your availability status.</p>
+                <!-- You can add a login link here -->
+            {% endif %}
+        
+        </div>
+    </div>
+</div>
+<!-- Add these links to your base.html or HTML file -->
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+
+{% endblock %}
