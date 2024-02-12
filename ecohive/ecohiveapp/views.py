@@ -79,24 +79,27 @@ def user_login(request):
 
             if user is not None:
                 login(request, user)
-                auth_login(request,user)
-                if user.is_customer:
-                    # login(request, user)
+                if hasattr(user, 'delivery_agent'):
+                    delivery_agent = user.delivery_agent
+                    if delivery_agent.is_approved():
+                        request.session['delivery_agent_id'] = delivery_agent.id
+                        request.session['user_type'] = 'delivery_agent'
+                        return redirect('deliverydetails')
+                    else:
+                        msg = 'Your delivery agent account is not approved yet.'
+                elif user.is_customer:
                     request.session['customer_id'] = user.id
                     request.session['user_type'] = 'customer'
                     return redirect('index')
                 elif user.is_seller:
-                    # login(request, user)
                     request.session['seller_id'] = user.id
                     request.session['user_type'] = 'seller'
                     return redirect('index')
                 elif user.is_legaladvisor:
-                    print("Redirecting to dashlegal")
                     request.session['legaladvisor_id'] = user.id
                     request.session['user_type'] = 'legaladvisor'
                     return redirect('dashlegal')
                 elif user.is_superuser:
-                    print("Redirecting to dashlegal")
                     request.session['admin_id'] = user.id
                     request.session['user_type'] = 'admin'
                     return redirect('admindash')
@@ -1054,8 +1057,11 @@ def regdelivery(request):
         email = request.POST.get('email')
         phone = request.POST.get('phone')
         license_number = request.POST.get('license')
-        vechicle_type = request.POST.get('vechicle_type')
+        vehicle_type = request.POST.get('vehicle_type')
         location = request.POST.get('location')
+        latitude = request.POST.get('latitude')
+        longitude = request.POST.get('longitude')
+
         password = request.POST.get('password')
 
         # Use the custom manager to create a new user
@@ -1073,8 +1079,9 @@ def regdelivery(request):
             email=email,
             phone=phone,
             license_number=license_number,
-            vechicle_type=vechicle_type,
-            location=location,
+            vechicle_type=vehicle_type,
+            latitude=latitude,
+            longitude=longitude,
             status='pending',  # Set the status to 'pending'
         )
 
@@ -1084,10 +1091,11 @@ def regdelivery(request):
     return render(request, 'regdelivery.html')
 
 
+from django.core.serializers import serialize
 
 def deliveryagent(request):
     delivery_agents = DeliveryAgent.objects.all()
-    return render(request, 'admindash/deliveryagent.html', {'delivery_agents': delivery_agents})
+    return render(request, 'admindash/deliveryagent.html', {'delivery_agents': delivery_agents })
 
 from django.views.decorators.http import require_POST  # Import require_POST decorator
 @require_POST
@@ -1104,22 +1112,22 @@ def reject_delivery_agent(request, agent_id):
     delivery_agent.save()
     return redirect('deliveryagent') 
 
-def deliverylogin(request):
-    if request.method == 'POST':
-        username = request.POST.get('username')
-        password = request.POST.get('password')
+# def deliverylogin(request):
+#     if request.method == 'POST':
+#         username = request.POST.get('username')
+#         password = request.POST.get('password')
 
-        # Authenticate the user
-        user = authenticate(request, username=username, password=password)
+#         # Authenticate the user
+#         user = authenticate(request, username=username, password=password)
 
-        if user is not None and user.delivery_agent.is_approved():
-            # Login the user
-            login(request, user)
-            return redirect('deliverydetails')  # Redirect to the delivery agent dashboard
-        else:
-            messages.error(request, 'Invalid login or account not approved.')
+#         if user is not None and user.delivery_agent.is_approved():
+#             # Login the user
+#             login(request, user)
+#             return redirect('deliverydetails')  # Redirect to the delivery agent dashboard
+#         else:
+#             messages.error(request, 'Invalid login or account not approved.')
 
-    return render(request, 'deliverylogin.html')  # Update the template name
+#     return render(request, 'deliverylogin.html')  # Update the template name
 
 
 @login_required

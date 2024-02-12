@@ -74,7 +74,9 @@ class CertificationForm(forms.ModelForm):
             'certification_authority',
             'phone_number',  # Add 'phone_number' field
             'certification_number',# Add 'certification_number' field
-            'address',  
+            'address',
+            'latitude',  # Add 'latitude' field
+            'longitude',  # Add 'longitude' field  
         ]
     
     def __init__(self, *args, **kwargs):

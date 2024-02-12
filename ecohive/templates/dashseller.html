@@ -1,6 +1,7 @@
 {% extends 'sellerdash/base.html' %}
 {% load static %}
 {% block content %}
+<script type="text/javascript" src="https://www.bing.com/api/maps/mapcontrol?key=Agyr0UQGWTFzP3Fwb3PDJ_ahP24jx9jRgpUWwBD_37B8MXu1oql6WCs6J-vgU1YT"></script>
 <div class="container">
     <div class="card">
         <div class="card-body">
@@ -77,6 +78,32 @@
                     <input type="file" accept=".img,.jpg,.png/*" id="{{ form.certification_image.id_for_label }}" name="{{ form.certification_image.name }}" class="form-control" required>
                     <span class="text-danger" id="certification-image-error"></span>
                 </div>
+                <p class="card-description"> Location </p>
+                <div class="row">
+                  <div class="col-md-6">
+                    <div class="form-group row">
+                      <label for="latitude" class="col-sm-3 col-form-label">Latitude</label>
+                      <div class="col-sm-9">
+                        <input type="text" id="lat" name="latitude" class="form-control" required>
+                        <span id="latspan" class="text-danger"></span>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="form-group row">
+                      <label for="longitude" class="col-sm-3 col-form-label">Longitude</label>
+                      <div class="col-sm-9">
+                        <input type="text" id="long" name="longitude"  class="form-control" required>
+                        <span id="longspan" class="text-danger"></span>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="form-group row">
+                      <button type="button" onclick="getCoordinates()" class="btn btn-dark btn-sm">Get Coordinates</button>
+                    </div>
+                  </div>
+                </div>
             
                 <div class="btn-container">
                     <button type="submit" id="submit-button" class="btn btn-primary" >Submit Certification Request</button>
@@ -86,6 +113,58 @@
         </div>
     </div>
 </div>
+<script>
+    var map;
+    var searchManager;
+
+    function initMap() {
+        map = new Microsoft.Maps.Map("#myMap", {
+            credentials: "Au3Blei_Uhp8WxG4OPh-ZutbAHXmqrN3vEc-UkASaaTY6adPoJEo2QHBLTyNNvhB",
+            zoom: 10,
+        });
+
+        // Retrieve data from Django view and loop through it
+        var locations = [
+            {% for record in seller %}
+            {
+                latitude: {{ record.latitude }},
+                longitude: {{ record.longitude }},
+                Store: "{{ record.storename }}",
+                place: "{{ record.address }}"
+            },
+            {% endfor %}
+        ];
+
+        // Create markers for each location
+        for (var i = 0; i < locations.length; i++) {
+            var location = locations[i];
+            var marker = new Microsoft.Maps.Pushpin(new Microsoft.Maps.Location(location.latitude, location.longitude), {
+                title: location.stname,
+                subTitle: location.place
+            });
+            map.entities.push(marker);
+        }
+    }
+    // Call the initMap function once the page is loaded
+    window.onload = initMap;
+
+    function getCoordinates() {
+        if (navigator.geolocation) {
+          navigator.geolocation.getCurrentPosition(showPosition);
+        } else {
+          alert("Geolocation is not supported by this browser.");
+        }
+      }
+  
+      function showPosition(position) {
+        const latitude = position.coords.latitude;
+        const longitude = position.coords.longitude;
+      
+        // Populate the latitude and longitude input fields with the obtained values
+        document.getElementById('lat').value = latitude;
+        document.getElementById('long').value = longitude;
+      }
+</script>
 <script>
     document.addEventListener("DOMContentLoaded", function () {
         const form = document.getElementById("certification-form");

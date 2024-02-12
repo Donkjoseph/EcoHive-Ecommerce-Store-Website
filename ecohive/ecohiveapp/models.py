@@ -82,6 +82,8 @@ class Certification(models.Model):
     phone_number = models.CharField(max_length=15, default="N/A")  # Change the default value as needed
     certification_number = models.CharField(max_length=50, default="N/A")  # Change the default value as needed
     address = models.CharField(max_length=255,default=1)
+    latitude = models.CharField(max_length=20,null=True,blank=True)
+    longitude = models.CharField(max_length=20,null=True,blank=True)
     timestamp = models.DateTimeField(auto_now_add=True)
     is_approved = models.CharField(
         max_length=10,
@@ -199,6 +201,38 @@ class BillingDetails(models.Model):
 
     def __str__(self):
         return f"{self.first_name} {self.last_name}'s Billing Details"
+    
+class DeliveryAgent(models.Model):
+    STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('approved', 'Approved'),
+        ('rejected', 'Rejected'),
+    ]
+    
+    AVAILABILITY_CHOICES = [
+        ('available', 'Available'),
+        ('not_available', 'Not Available'),
+    ]
+    
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='delivery_agent')
+    name = models.CharField(max_length=255)
+    username = models.CharField(max_length=30)  # Added username field
+    email = models.EmailField(unique=True)
+    phone = models.CharField(max_length=15)
+    license_number = models.CharField(max_length=20,unique=True)
+    vechicle_type = models.CharField(max_length=255,default=1)
+    latitude = models.CharField(max_length=20,null=True,blank=True)
+    longitude = models.CharField(max_length=20,null=True,blank=True)
+    password = models.CharField(max_length=255)
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='pending')
+    availability = models.CharField(max_length=15, choices=AVAILABILITY_CHOICES, default='not_available')
+
+
+    def __str__(self):
+        return self.name
+    
+    def is_approved(self):
+        return self.status == 'approved'
 
 
 class Order(models.Model):
@@ -305,33 +339,7 @@ class Review(models.Model):
     
 #Main Project
 
-class DeliveryAgent(models.Model):
-    STATUS_CHOICES = [
-        ('pending', 'Pending'),
-        ('approved', 'Approved'),
-        ('rejected', 'Rejected'),
-    ]
-    
-    AVAILABILITY_CHOICES = [
-        ('available', 'Available'),
-        ('not_available', 'Not Available'),
-    ]
-    
-    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='delivery_agent')
-    name = models.CharField(max_length=255)
-    username = models.CharField(max_length=30, unique=True)  # Added username field
-    email = models.EmailField(unique=True)
-    phone = models.CharField(max_length=15)
-    license_number = models.CharField(max_length=20,unique=True)
-    vechicle_type = models.CharField(max_length=255,default=1)
-    location = models.CharField(max_length=255)
-    password = models.CharField(max_length=255)
-    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='pending')
-    availability = models.CharField(max_length=15, choices=AVAILABILITY_CHOICES, default='not_available')
-
-
-    def __str__(self):
-        return self.name
-    
-    def is_approved(self):
-        return self.status == 'approved'
+    class Assignment(models.Model):
+        order = models.ForeignKey(Order, on_delete=models.CASCADE)
+        delivery_agent = models.ForeignKey(DeliveryAgent, on_delete=models.CASCADE)
+        assigned_at = models.DateTimeField(auto_now_add=True)

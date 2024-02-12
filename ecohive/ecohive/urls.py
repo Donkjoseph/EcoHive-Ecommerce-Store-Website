@@ -125,7 +125,7 @@ urlpatterns = [
     path('deliveryagent', views.deliveryagent, name='deliveryagent'),
     path('approve_delivery_agent/<int:agent_id>/approve/', views.approve_delivery_agent, name='approve_delivery_agent'),
     path('reject_delivery_agent/<int:agent_id>/reject/', views.reject_delivery_agent, name='reject_delivery_agent'),
-    path('deliverylogin', views.deliverylogin, name='deliverylogin'),
+    # path('deliverylogin', views.deliverylogin, name='deliverylogin'),
     path('deliverydetails', views.deliverydetails, name='deliverydetails'),
     path('delivery_agents/', views.delivery_agents, name='delivery_agents'),
 
