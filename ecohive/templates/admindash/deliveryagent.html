@@ -74,6 +74,7 @@
         var deliveryAgents = [
             {% for agent in delivery_agents %}
             {
+                print(agent)
                 latitude: {{ agent.latitude }},
                 longitude: {{ agent.longitude }},
                 
