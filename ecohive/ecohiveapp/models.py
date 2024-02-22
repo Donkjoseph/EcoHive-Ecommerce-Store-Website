@@ -59,6 +59,8 @@ class UserProfile(models.Model):
     # gender = models.CharField(max_length=10, choices=GENDER_CHOICES)
     phone_number = models.CharField(max_length=20, null=True, blank=True)
     address = models.TextField(blank=True, null=True)
+    latitude = models.DecimalField(max_digits=20, decimal_places=15, default=0.0)
+    longitude = models.DecimalField(max_digits=20, decimal_places=15, default=0.0)
     
     def __str__(self):
         return self.user.username
@@ -198,6 +200,9 @@ class BillingDetails(models.Model):
     postcode_zip = models.CharField(max_length=20)
     phone = models.CharField(max_length=20)
     email = models.EmailField()
+    latitude = models.DecimalField(max_digits=9, decimal_places=6, default=0.0)
+    longitude = models.DecimalField(max_digits=9, decimal_places=6, default=0.0)
+
 
     def __str__(self):
         return f"{self.first_name} {self.last_name}'s Billing Details"
@@ -229,8 +234,8 @@ class DeliveryAgent(models.Model):
 
 
     def __str__(self):
-        return self.name
-    
+        return self.user.username
+        
     def is_approved(self):
         return self.status == 'approved'
 
@@ -343,3 +348,20 @@ class Review(models.Model):
         order = models.ForeignKey(Order, on_delete=models.CASCADE)
         delivery_agent = models.ForeignKey(DeliveryAgent, on_delete=models.CASCADE)
         assigned_at = models.DateTimeField(auto_now_add=True)
+        
+class UserAgentDistance(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE,null=True, blank=True)
+    agent = models.ForeignKey(DeliveryAgent, on_delete=models.CASCADE,null=True, blank=True)
+    distance = models.FloatField(null=True, blank=True)
+
+    class Meta:
+        unique_together = ('user', 'agent')
+
+class Assigndeliveryagent(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE,blank=True, null=True)
+    seller = models.ForeignKey(Seller, on_delete=models.CASCADE)
+    billingdetails = models.ForeignKey(BillingDetails, on_delete=models.CASCADE)
+    deliveryagent =  models.ForeignKey(DeliveryAgent, on_delete=models.CASCADE)
+    order = models.ForeignKey(Order, on_delete=models.CASCADE,null=True, blank=True )
+    timestamp = models.DateTimeField(auto_now_add=True,null=True, blank=True, )
+    

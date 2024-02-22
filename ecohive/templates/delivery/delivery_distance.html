@@ -1,0 +1,44 @@
+{% extends 'delivery/base.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+    }
+    .container {
+        max-width: 800px;
+        margin: 50px auto;
+        padding: 20px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+    }
+    h1 {
+        text-align: center;
+    }
+    .distance-info {
+        text-align: center;
+        font-size: 20px;
+        margin-top: 30px;
+    }
+</style>
+<div class="container">
+    <div class="card mt-5">
+        <div class="card-body">
+            <div class="container">
+                <h1>Delivery Agent Distance</h1>
+                <div class="distance-info">
+                    {% if distance %}
+                        <p>The distance between you and the assigned user is {{ distance }} kilometers.</p>
+                    {% else %}
+                        <p>No distance information available.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

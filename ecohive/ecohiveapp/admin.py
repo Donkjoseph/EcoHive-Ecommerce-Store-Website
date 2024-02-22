@@ -77,7 +77,7 @@ class PaymentAdmin(admin.ModelAdmin):
 
 @admin.register(BillingDetails)
 class BillingDetailsAdmin(admin.ModelAdmin):
-    list_display = ('user', 'first_name', 'last_name', 'email', 'phone')
+    list_display = ('user', 'first_name', 'last_name', 'email', 'phone','latitude','longitude')
     search_fields = ('user__username', 'email')
 
 from .models import Order
@@ -137,3 +137,15 @@ class DeliveryAgentAdmin(admin.ModelAdmin):
     readonly_fields = ('user',)  # Assuming you don't want to edit the user field in the admin
 
 admin.site.register(DeliveryAgent, DeliveryAgentAdmin)
+
+from .models import UserAgentDistance, Assigndeliveryagent
+
+@admin.register(UserAgentDistance)
+class UserAgentDistanceAdmin(admin.ModelAdmin):
+    list_display = ('user', 'agent', 'distance')
+    # Add any other configurations as needed
+
+@admin.register(Assigndeliveryagent)
+class AssigndeliveryagentAdmin(admin.ModelAdmin):
+    list_display = ('user', 'seller', 'billingdetails', 'deliveryagent', 'order', 'timestamp')
+    # Add any other configurations as needed

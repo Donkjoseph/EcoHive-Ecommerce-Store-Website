@@ -17,7 +17,7 @@ from django.shortcuts import get_object_or_404
 
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required 
-from .models import Category,Product,Seller,UserProfile
+from .models import Category,Product,Seller,UserProfile,UserAgentDistance,Assigndeliveryagent
 from django.db import IntegrityError  
 from allauth.socialaccount.providers.oauth2.views import OAuth2LoginView
 from allauth.account.views import SignupView
@@ -692,7 +692,74 @@ from django.shortcuts import render, redirect
 from decimal import Decimal
 
 from django.db import transaction
+import requests
 
+
+
+
+# @transaction.atomic
+# def checkout(request):
+#     total_price = 0  # Initialize total_price outside the if block
+#     cart_items = Cart.objects.filter(user=request.user)  # Define cart_items here
+#     billing_details = None  # Initialize billing_details to None
+
+
+#     # Check if billing details exist for the user
+#     if BillingDetails.objects.filter(user=request.user).exists():
+#         billing_details = BillingDetails.objects.get(user=request.user)
+
+#     if request.method == 'POST' and 'place_order' in request.POST:
+#         # If billing details already exist, you can skip processing the form and just calculate the total price
+#         if not billing_details:
+#             # Retrieve and process the form data for billing details
+#             first_name = request.POST.get('firstname')
+#             last_name = request.POST.get('lastname')
+#             state = request.POST.get('state')
+#             street_address = request.POST.get('streetaddress')
+#             apartment_suite_unit = request.POST.get('apartmentsuiteunit')
+#             town_city = request.POST.get('towncity')
+#             postcode_zip = request.POST.get('postcodezip')
+#             phone = request.POST.get('phone')
+#             email = request.POST.get('emailaddress')
+
+#             # Create BillingDetails object (assuming BillingDetails is a separate model)
+#             billing_details = BillingDetails(
+#                 user=request.user,
+#                 first_name=first_name,
+#                 last_name=last_name,
+#                 state=state,
+#                 street_address=street_address,
+#                 apartment_suite_unit=apartment_suite_unit,
+#                 town_city=town_city,
+#                 postcode_zip=postcode_zip,
+#                 phone=phone,
+#                 email=email,
+#             )
+
+#             billing_details.save()
+
+#         total_price = sum(item.product.product_price * item.quantity for item in cart_items)
+
+#         # Convert total_price to a float before storing it in the session
+#         request.session['order_total'] = float(total_price)
+
+#         # Redirect to the payment page to complete the order
+#         return redirect('payment')
+
+#     # If it's not a POST request or not a place order request, continue displaying the cart items
+#     total_price = sum(item.product.product_price * item.quantity for item in cart_items)
+
+#     # Convert total_price to a float before passing it to the template
+#     context = {
+#         'cart_items': cart_items,
+#         'total_price': float(total_price),
+#         'billing_details': billing_details,  # Pass billing_details to the template
+#     }
+
+#     return render(request, 'checkout.html', context)
+
+
+@login_required
 @transaction.atomic
 def checkout(request):
     total_price = 0  # Initialize total_price outside the if block
@@ -710,25 +777,48 @@ def checkout(request):
             first_name = request.POST.get('firstname')
             last_name = request.POST.get('lastname')
             state = request.POST.get('state')
-            street_address = request.POST.get('streetaddress')
-            apartment_suite_unit = request.POST.get('apartmentsuiteunit')
-            town_city = request.POST.get('towncity')
             postcode_zip = request.POST.get('postcodezip')
             phone = request.POST.get('phone')
             email = request.POST.get('emailaddress')
 
+            # Check if latitude and longitude are provided in the form
+            latitude = request.POST.get('latitude')
+            longitude = request.POST.get('longitude')
+
+            if latitude and longitude:
+                # Use latitude and longitude from the form
+                latitude = float(latitude)
+                longitude = float(longitude)
+            else:
+                # Use geocoding service to get latitude and longitude
+                address = f"{state}, {postcode_zip}"
+                geocode_url = f"https://nominatim.openstreetmap.org/search?q={address}&format=json"
+                response = requests.get(geocode_url)
+                if response.ok:
+                    data = response.json()
+                    if data:
+                        latitude = float(data[0]['lat'])
+                        longitude = float(data[0]['lon'])
+                    else:
+                        latitude = None
+                        longitude = None
+                else:
+                    latitude = None
+                    longitude = None
+
+            print(latitude)
+            print(longitude)
             # Create BillingDetails object (assuming BillingDetails is a separate model)
             billing_details = BillingDetails(
                 user=request.user,
                 first_name=first_name,
                 last_name=last_name,
                 state=state,
-                street_address=street_address,
-                apartment_suite_unit=apartment_suite_unit,
-                town_city=town_city,
                 postcode_zip=postcode_zip,
                 phone=phone,
                 email=email,
+                latitude=latitude,  # Save latitude
+                longitude=longitude  # Save longitude
             )
             billing_details.save()
 
@@ -752,6 +842,27 @@ def checkout(request):
 
     return render(request, 'checkout.html', context)
 
+
+
+def save_location_view(request):
+    if request.method == 'POST':
+        latitude = request.POST.get('latitude')
+        longitude = request.POST.get('longitude')
+
+        # Get the billing details object for the user if it exists; otherwise, create a new one
+        billingdetails, created = BillingDetails.objects.get_or_create(user=request.user)
+
+        # Update latitude and longitude
+        if hasattr(billingdetails, 'latitude') and hasattr(billingdetails, 'longitude'):
+            billingdetails.latitude = latitude
+            billingdetails.longitude = longitude
+            billingdetails.save()
+            return JsonResponse({'message': 'Location saved successfully.'})
+        else:
+            return JsonResponse({'error': 'BillingDetails object does not have latitude and longitude attributes.'}, status=400)
+    else:
+        return JsonResponse({'error': 'Invalid request.'}, status=400)
+
 #payment
 from django.shortcuts import render
 import razorpay
@@ -762,16 +873,98 @@ from django.http import HttpResponseBadRequest
 razorpay_client = razorpay.Client(
     auth=(settings.RAZOR_KEY_ID, settings.RAZOR_KEY_SECRET))
 
+# def payment(request):
+#     cart_items = Cart.objects.filter(user=request.user)
+#     total_price = Decimal(sum(cart_item.product.product_price * cart_item.quantity for cart_item in cart_items))
+    
+#     currency = 'INR'
+
+#     # Set the 'amount' variable to 'total_price'
+#     amount = int(total_price*100)
+#     # amount=20000
+
+#     # Create a Razorpay Order
+#     razorpay_order = razorpay_client.order.create(dict(
+#         amount=amount,
+#         currency=currency,
+#         payment_capture='0'
+#     ))
+
+#     # Order id of the newly created order
+#     razorpay_order_id = razorpay_order['id']
+#     callback_url = '/paymenthandler/'
+
+#     order = Order.objects.create(
+#         user=request.user,
+#         total_price=total_price,
+#         razorpay_order_id=razorpay_order_id,
+#         payment_status=Order.PaymentStatusChoices.PENDING,
+#     )
+
+#     # Add the products to the order
+#     for cart_item in cart_items:
+#         product = cart_item.product
+#         price = product.product_price
+#         quantity = cart_item.quantity
+#         total_item_price = price * quantity
+
+#         # Create an OrderItem for this product
+#         order_item = OrderItem.objects.create(
+#             order=order,
+#             product=product,
+#             seller=product.seller,  # Set the seller of the product as the seller of the order item
+#             quantity=quantity,
+#             price=price,
+#             total_price=total_item_price,
+#         )
+
+#     # Save the order to generate an order ID
+#     order.save()
+
+#     # Create a context dictionary with all the variables you want to pass to the template
+#     context = {
+#         'cart_items': cart_items,
+#         'total_price': total_price,
+#         'razorpay_order_id': razorpay_order_id,
+#         'razorpay_merchant_key': settings.RAZOR_KEY_ID,
+#         'razorpay_amount': amount,  # Set to 'total_price'
+#         'currency': currency,
+#         'callback_url': callback_url,
+#     }
+
+#     return render(request, 'payment.html', context=context)
+
+from math import sin, cos, sqrt, atan2, radians
+
+def haversine(lat1, lon1, lat2, lon2):
+    # Helper function to convert latitude and longitude strings to floats
+    def convert_coord(coord):
+        return float(coord) if coord is not None else 0.0
+    
+    # Convert latitude and longitude strings to floats
+    lat1, lon1, lat2, lon2 = map(convert_coord, [lat1, lon1, lat2, lon2])
+
+    # Convert latitude and longitude from degrees to radians
+    lat1, lon1, lat2, lon2 = map(radians, [lat1, lon1, lat2, lon2])
+
+    # Haversine formula (rest of the function remains the same)
+    dlat = lat2 - lat1
+    dlon = lon2 - lon1
+    a = sin(dlat / 2) ** 2 + cos(lat1) * cos(lat2) * sin(dlon / 2) ** 2
+    c = 2 * atan2(sqrt(a), sqrt(1 - a))
+    distance = 6371.0 * c  # Radius of Earth in kilometers
+
+    return distance
+
+@login_required
 def payment(request):
     cart_items = Cart.objects.filter(user=request.user)
+    billingdetails = BillingDetails.objects.get(user=request.user)
+    agents = DeliveryAgent.objects.all()
     total_price = Decimal(sum(cart_item.product.product_price * cart_item.quantity for cart_item in cart_items))
-    
     currency = 'INR'
-
-    # Set the 'amount' variable to 'total_price'
-    amount = int(total_price*100)
-    # amount=20000
-
+    amount = int(total_price * 100)
+    
     # Create a Razorpay Order
     razorpay_order = razorpay_client.order.create(dict(
         amount=amount,
@@ -783,25 +976,49 @@ def payment(request):
     razorpay_order_id = razorpay_order['id']
     callback_url = '/paymenthandler/'
 
+    # Create an Order outside the loop
     order = Order.objects.create(
         user=request.user,
         total_price=total_price,
         razorpay_order_id=razorpay_order_id,
         payment_status=Order.PaymentStatusChoices.PENDING,
     )
+    
 
-    # Add the products to the order
+    latitude = billingdetails.latitude
+    longitude = billingdetails.longitude
+
+    for agent in agents:
+        if latitude is not None and longitude is not None:
+            # Calculate distance for each seller using haversine
+            distance = haversine(agent.latitude, agent.longitude, billingdetails.latitude, billingdetails.longitude)
+            UserAgentDistance.objects.update_or_create(
+                user=request.user,
+                agent=agent,
+                defaults={'distance': distance}
+            )
+    useragent = UserAgentDistance.objects.filter(user=request.user)
+    nearby_agent = useragent.filter(
+        distance__isnull=False,
+        user=request.user,
+    ).order_by('distance')[:1]
+
+    nearest_user_agent_distance = nearby_agent.first()
+    if nearest_user_agent_distance:
+        nearest_delivery_agent = nearest_user_agent_distance.agent
+    # Loop through cart items and create OrderItem for each product
     for cart_item in cart_items:
         product = cart_item.product
         price = product.product_price
         quantity = cart_item.quantity
         total_item_price = price * quantity
 
-        # Create an OrderItem for this product
+
+       
         order_item = OrderItem.objects.create(
             order=order,
             product=product,
-            seller=product.seller,  # Set the seller of the product as the seller of the order item
+            seller=product.seller,
             quantity=quantity,
             price=price,
             total_price=total_item_price,
@@ -809,20 +1026,23 @@ def payment(request):
 
     # Save the order to generate an order ID
     order.save()
-
+    Assigndeliveryagent.objects.create(
+            seller=cart_item.product.seller, user=request.user, billingdetails=billingdetails, order=order, deliveryagent=nearest_delivery_agent
+        )
+    
     # Create a context dictionary with all the variables you want to pass to the template
     context = {
         'cart_items': cart_items,
         'total_price': total_price,
         'razorpay_order_id': razorpay_order_id,
         'razorpay_merchant_key': settings.RAZOR_KEY_ID,
-        'razorpay_amount': amount,  # Set to 'total_price'
+        'razorpay_amount': amount,
         'currency': currency,
         'callback_url': callback_url,
+        'order_item': order_item,
     }
 
     return render(request, 'payment.html', context=context)
-
 @csrf_exempt
 def paymenthandler(request):
     if request.method == "POST":
@@ -1154,3 +1374,69 @@ def delivery_agents(request):
     context = {'delivery_agents': delivery_agents}
     
     return render(request, 'sellerdash/delivery_agents.html', context)
+
+
+
+@login_required
+def agentorder(request):
+    try:
+        current_delivery_agent = request.user.delivery_agent
+        assigned_orders = Assigndeliveryagent.objects.filter(deliveryagent=current_delivery_agent)
+    except DeliveryAgent.DoesNotExist:
+        current_delivery_agent = None
+        assigned_orders = None
+    
+    return render(request, 'delivery/agentorders.html', {'assigned_orders': assigned_orders})
+
+def get_billing_details(request, billing_details_id):
+    billing_details = BillingDetails.objects.get(pk=billing_details_id)
+    data = {
+        'first_name': billing_details.first_name,
+        'last_name': billing_details.last_name,
+        'state': billing_details.state,
+        'street_address': billing_details.street_address,
+        'apartment_suite_unit': billing_details.apartment_suite_unit,
+        'town_city': billing_details.town_city,
+        'postcode_zip': billing_details.postcode_zip,
+        'phone': billing_details.phone,
+        'email': billing_details.email,
+    }
+    return JsonResponse(data)
+
+def get_order_product_details(request, order_id):
+    try:
+        order = Order.objects.get(pk=order_id)
+        order_items = OrderItem.objects.filter(order=order)
+        
+        order_product_details = []
+        for order_item in order_items:
+            order_product_details.append({
+                'product': order_item.product.product_name,  # Assuming 'title' is the attribute representing the name of the product
+                'price': order_item.price,
+                'quantity': order_item.quantity,
+                'total_price': order_item.total_price,
+            })
+        
+        return JsonResponse(order_product_details, safe=False)
+    
+    except Order.DoesNotExist:
+        return JsonResponse({'error': 'Order not found'}, status=404)
+    
+
+@login_required
+def delivery_distance(request):
+    try:
+        # Retrieve the currently logged-in delivery agent
+        current_delivery_agent = request.user.delivery_agent
+
+        # Retrieve the assignment for the current delivery agent
+        assignment = get_object_or_404(Assigndeliveryagent, deliveryagent=current_delivery_agent)
+
+        # Retrieve the distance between the user (customer) and the delivery agent
+        user_agent_distance = get_object_or_404(UserAgentDistance, user=assignment.user, agent=current_delivery_agent)
+        distance = user_agent_distance.distance
+
+    except (Assigndeliveryagent.DoesNotExist, UserAgentDistance.DoesNotExist):
+        distance = None
+
+    return render(request, 'delivery/delivery_distance.html', {'distance': distance})

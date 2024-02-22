@@ -238,13 +238,23 @@ textarea:focus {
           <ul id="sidebarnav">
             <li class="nav-small-cap">
               <i class="ti ti-dots nav-small-cap-icon fs-4"></i>
-              <span class="hide-menu">Delivery Agent Details</span>
+              <span class="hide-menu">Delivery Agent Dashboard</span>
             </li>
             <li class="sidebar-item">
               <a class="sidebar-link" href="{% url 'deliverydetails' %}" aria-expanded="false">
                 <span class="hide-menu">Delivery Details</span>
               </a>
             </li> 
+            <li class="sidebar-item">
+              <a class="sidebar-link" href="{% url 'agentorder' %}" aria-expanded="false">
+                <span class="hide-menu">Assigned Orders</span>
+              </a>
+            </li>
+            <li class="sidebar-item">
+              <a class="sidebar-link" href="{% url 'delivery_distance' %}" aria-expanded="false">
+                <span class="hide-menu">Distance </span>
+              </a>
+            </li>
           </ul>
         </nav>
         <!-- End Sidebar navigation -->

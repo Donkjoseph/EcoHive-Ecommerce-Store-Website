@@ -128,8 +128,11 @@ urlpatterns = [
     # path('deliverylogin', views.deliverylogin, name='deliverylogin'),
     path('deliverydetails', views.deliverydetails, name='deliverydetails'),
     path('delivery_agents/', views.delivery_agents, name='delivery_agents'),
-
-
+    path('save_location_view/', views.save_location_view, name='save_location_view'),
+    path('agentorder', views.agentorder, name='agentorder'),
+    path('get-billing-details/<int:billing_details_id>/', views.get_billing_details, name='get_billing_details'),
+    path('get-order-product-details/<int:order_id>/', views.get_order_product_details, name='get_order_product_details'),
+    path('delivery_distance/', views.delivery_distance, name='delivery_distance'),
 
 
 ]

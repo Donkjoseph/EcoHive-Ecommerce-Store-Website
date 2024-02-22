@@ -7,6 +7,7 @@
         color:red;
     }
 </style>
+<script type="text/javascript" src="https://www.bing.com/api/maps/mapcontrol?key=Agyr0UQGWTFzP3Fwb3PDJ_ahP24jx9jRgpUWwBD_37B8MXu1oql6WCs6J-vgU1YT"></script>
     <div class="hero-wrap hero-bread" style="background-image:url({% static 'images/bg_1.jpg' %});">
       <div class="container">
         <div class="row no-gutters slider-text align-items-center justify-content-center">
@@ -46,7 +47,7 @@
                         <div class="w-100"></div>
                         <div class="col-md-12">
                             <div class="form-group">
-                                <label for="state">State</label>
+                                <label for="state">District</label>
                                 <div class="select-wrap">
                                     <div class="icon"><span class="ion-ios-arrow-down"></span></div>
                                     <select id="state" name="state" value="{{ billing_details.state }}" class="form-control">
@@ -123,8 +124,83 @@
                         </div>
                         <div class="w-100"></div>
                     </div>
-                    <p><button type="submit" class="btn btn-primary py-3 px-4" name="place_order">Proceed to Payment</button></p>
+                    <a id="changelocation-button" style="background: none; border: none; color: #9abf69; text-decoration: none; margin-left:20px; cursor: pointer;">
+                        {% if billing_details.latitude is not None and billing_details.longitude is not None and billing_details.latitude|default:0.0 != 0.0 and billing_details.longitude|default:0.0 != 0.0 %}
+                          Change Location
+                        {% else %}
+                          Add Location
+                        {% endif %}
+                    </a>    
+                    <button type="submit" class="btn btn-primary py-3 px-4" name="place_order">Proceed to Payment</button>
                 </form>
+                <form id="location-section" class="row g-4" style="display: none; margin-top:10px;"  method="post" onsubmit="return validatelocationForm()" >     
+                    {% csrf_token %}                 
+                    <div class="col-lg-3 col-md-6 wow fadeInUp" data-wow-delay="0.1s">
+                      <div class="form-group">
+                          {% if billing_details.latitude and billing_details.longitude %}
+                              <input class="form-control text animated zoomIn"  type="text" id="lat"  class="cardelement" placeholder="Latitude" name="latitude" required>
+                          {% else %}
+                              <input class="form-control text animated zoomIn" type="text" id="lat"  class="cardelement" placeholder="Latitude" name="latitude" required>
+                          {% endif %}
+                          <span id="latspan" class="text-danger error-message"></span> <!-- Add error message span -->
+                      </div>
+                  </div>
+                  <div class="col-lg-3 col-md-6 wow fadeInUp" data-wow-delay="0.1s">   
+                      <div class="form-group">
+                          {% if billing_details.latitude and billing_details.longitude %}
+                              <input class="form-control text animated zoomIn" type="text" id="long"  name="longitude" placeholder="Longitude"class="cardelement" required>
+                          {% else %}
+                              <input class="form-control text animated zoomIn" type="text" id="long"  name="longitude" placeholder="Longitude"class="cardelement" required>
+                          {% endif %}
+                          <span id="longspan" class="text-danger error-message"></span> <!-- Add error message span -->
+                      </div>
+                  </div>            
+                      <div class="col-lg-3 col-md-6 wow fadeInUp" data-wow-delay="0.1s">  
+                        <button onclick="getCoordinates()" style="background: none; border: none; text-decoration: none; margin-left:20px; cursor: pointer;">
+                          Get Coordinates
+                        </button> 
+                      </div>
+                      <div class="col-lg-3 col-md-6 wow fadeInUp" data-wow-delay="0.1s">  
+                        <button  id="save-location-button" class="btn btn-dark rounded-pill py-2 px-6 " style="text-shadow: rgba(1, 1, 1, 0.25) 0px 14px 28px, rgba(1, 1, 1, 0.22) 0px 3px 3px;" type="button" >Save Location</button>
+                      </div>
+                    </form> 
+                    {% if billing_details.latitude and billing_details.longitude %}
+                    <div class="mb-4" id="myMap" style="width: 100%; height: 150px;"></div>
+                    <div class="mb-4" id="locationInfo"></div>
+                     {% endif %}
+                    <!-- END -->
+                    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+                    <script>
+                        $(document).ready(function() {
+                        $("#changelocation-button").click(function() {
+                            // Check the current display state of the reviews section
+                            var locationSection = $("#location-section");
+                            var isDisplayed = locationSection.is(":visible");
+                        
+                            // Toggle the display state (show if hidden, hide if shown)
+                            locationSection.toggle();
+                        
+                            // If the section was hidden, make an AJAX request to load the reviews
+                            
+                        });
+                        });
+                        
+                        function getCoordinates() {
+                            if (navigator.geolocation) {
+                                navigator.geolocation.getCurrentPosition(showPosition);
+                            } else {
+                                alert("Geolocation is not supported by this browser.");
+                            }
+                            }
+                        function showPosition(position) {
+                            const latitude = position.coords.latitude;
+                            const longitude = position.coords.longitude;
+                            
+                            // Populate the latitude and longitude input fields with the obtained values
+                            document.getElementById('lat').value = latitude;
+                            document.getElementById('long').value = longitude;
+                            }
+                    </script>
                 <script>
                     function validateForm() {
                         var valid = true;
@@ -190,6 +266,8 @@
                 
                         return valid;
                     }
+
+                    
                 </script>
                     <!-- END -->
                 </div>
@@ -227,4 +305,206 @@
             </div>
         </div>
     </section> <!-- .section -->
+    <script>
+        $(document).ready(function() {
+            $("#save-location-button").click(function() {
+                // Get latitude and longitude values
+                const latitude = $("#lat").val();
+                const longitude = $("#long").val();
+    
+                // Make AJAX request to save location
+                $.ajax({
+                    url: "{% url 'save_location_view' %}",
+                    type: "POST",
+                    data: {
+                        latitude: latitude,
+                        longitude: longitude,
+                        csrfmiddlewaretoken: "{{ csrf_token }}"
+                    },
+                    success: function(response) {
+                        // Handle success response, such as showing a success message
+                        alert("Location saved successfully!");
+                        // You can also redirect the user to another page if needed
+                        window.location.href = "{% url 'checkout' %}";
+                    },
+                    error: function(xhr, errmsg, err) {
+                        // Handle error response
+                        console.log(xhr.status + ": " + xhr.responseText); // Log error message
+                        alert("Failed to save location. Please try again.");
+                    }
+                });
+            });
+        });
+    </script>
+    
+    <script type="text/javascript">
+        var map;
+    
+        function GetMap() {
+            var latitude = {{ billing_details.latitude|default:0 }};
+            var longitude = {{ billing_details.longitude|default:0 }};
+    
+            map = new Microsoft.Maps.Map(document.getElementById('myMap'), {
+                center: new Microsoft.Maps.Location(latitude, longitude),
+                zoom: 10
+            });
+    
+            var location = new Microsoft.Maps.Location(latitude, longitude);
+            var pin = new Microsoft.Maps.Pushpin(location, { title: 'Location' });
+            map.entities.push(pin);
+    
+            reverseGeocode(latitude, longitude);
+        }
+    
+        function reverseGeocode(latitude, longitude) {
+            var apiKey = 'Au3Blei_Uhp8WxG4OPh-ZutbAHXmqrN3vEc-UkASaaTY6adPoJEo2QHBLTyNNvhB';
+            var apiUrl = 'https://dev.virtualearth.net/REST/v1/Locations/' + latitude + ',' + longitude + '?key=' + apiKey;
+    
+            fetch(apiUrl)
+            .then(response => response.json())
+            .then(data => {
+                if (data.resourceSets && data.resourceSets.length > 0) {
+                    const resources = data.resourceSets[0].resources;
+                    if (resources && resources.length > 0) {
+                        const address = resources[0].address;
+                        const state = address.adminDistrict2; // Assuming the district is stored in the 'locality' field
+    
+                        const street = address.addressLine;
+                        const town = address.locality;
+                        const pincode = address.postalCode;
+                        const city = address.locality;
+                        
+                        // Display or use these extracted values as needed
+                        console.log('District:', state);
+                        console.log('Street:', street);
+                        console.log('Town:', town);
+                        
+                        console.log('Pincode:', pincode);
+    
+                        // Example: Displaying in the HTML element
+                        displayLocationInfo(state, street, town, pincode);
+                    } else {
+                        console.error('No address found for the provided coordinates.');
+                    }
+                } else {
+                    console.error('No results found for reverse geocoding.');
+                }
+            })
+            .catch(error => console.error('Error fetching reverse geocoding data:', error));
+    }
+    
+    function displayLocationInfo(state, street, town, pincode) {
+        // Update the state dropdown menu
+        var stateSelect = document.getElementById('state');
+        var stateOptions = stateSelect.options;
+        for (var i = 0; i < stateOptions.length; i++) {
+            if (stateOptions[i].value === state) {
+                stateSelect.selectedIndex = i; // Set the selected index
+                break;
+            }
+        }
+    
+        // Update the street address field
+        document.getElementById('streetaddress').value = street;
+    
+        // Update the town/city field
+        document.getElementById('towncity').value = town;
+    
+        // Update the pincode field
+        document.getElementById('postcodezip').value = pincode;
+    }
+    
+    
+        // Call GetMap function when the page is loaded
+        window.onload = function() {
+            GetMap();
+        };
+    </script>
+    <script>
+        $(document).ready(function () {
+          $("#lat").change(function () {
+            validatelat();
+        });
+    
+        $("#long").change(function () {
+            validatelong();
+        });
+      });
+      function validatelocationForm() {
+        // Check if there are any error messages for latitude and longitude
+        const latError = $("#latspan").text().trim();
+        const longError = $("#longspan").text().trim();
+    
+        if (latError !== '' || longError !== '') {
+            return false; // Prevent form submission if there are validation errors
+        }
+    
+        return true; // Submit the form if there are no validation errors
+    }
+    
+      function validatelat() {
+        var latitude = $("#lat").val().trim();
+        var latError = $("#latspan");
+        var latPattern = /^[-+]?([1-8]?\d(\.\d+)?|90(\.0+)?)$/; // Regex for latitude
+    
+        if (latitude === "") {
+            latError.html("Latitude is required").css("color", "red");
+        } else if (!latPattern.test(latitude)) {
+            latError.html("Invalid latitude format").css("color", "red");
+        } else {
+            latError.html("").css("color", "red");
+        }
+    }
+    
+    function validatelong() {
+        var longitude = $("#long").val().trim();
+        var longError = $("#longspan");
+        var longPattern = /^[-+]?(180(\.0+)?|((1[0-7]\d)|(\d{1,2}))(\.\d+)?)$/; // Regex for longitude
+    
+        if (longitude === "") {
+            longError.html("Longitude is required").css("color", "red");
+        } else if (!longPattern.test(longitude)) {
+            longError.html("Invalid longitude format").css("color", "red");
+        } else {
+            longError.html("").css("color", "red");
+        }
+    } 
+    
+        </script>
+        <script>
+            function geocodeAddress() {
+                // Fetch address details from form
+                const district = document.getElementById('state').value;
+                const streetAddress = document.getElementById('streetaddress').value;
+                const townCity = document.getElementById('towncity').value;
+                const postcodeZip = document.getElementById('postcodezip').value;
+                const address = `${streetAddress}, ${townCity}, ${district}, ${postcodeZip}`;
+        
+                // Perform geocoding using Bing Maps API
+                fetch('https://dev.virtualearth.net/REST/v1/Locations?q=' + encodeURIComponent(address) + '&key=Au3Blei_Uhp8WxG4OPh-ZutbAHXmqrN3vEc-UkASaaTY6adPoJEo2QHBLTyNNvhB')
+                    .then(response => response.json())
+                    .then(data => {
+                        const coordinates = data.resourceSets[0].resources[0].point.coordinates;
+                        const latitude = coordinates[0];
+                        const longitude = coordinates[1];
+        
+                        // Update latitude and longitude fields in the form
+                        document.getElementById('latitude').value = latitude;
+                        document.getElementById('longitude').value = longitude;
+                    })
+                    .catch(error => console.error('Error geocoding address:', error));
+            }
+        
+            // Call geocodeAddress function when the form is submitted
+            document.querySelector('form').addEventListener('submit', function(event) {
+                event.preventDefault(); // Prevent the default form submission
+                geocodeAddress(); // Call the geocoding function
+                this.submit(); // Submit the form after geocoding
+            });
+        
+            // Optional: Call geocodeAddress function when certain address fields are changed
+            // Example: Call geocodeAddress when the state dropdown changes
+            document.getElementById('state').addEventListener('change', geocodeAddress);
+        
+        </script>
     {%endblock%}

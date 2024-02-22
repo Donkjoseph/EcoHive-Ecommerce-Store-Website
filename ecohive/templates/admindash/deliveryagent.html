@@ -3,9 +3,9 @@
 {% block content %}
 
 <script type="text/javascript" src="https://www.bing.com/api/maps/mapcontrol?key=Agyr0UQGWTFzP3Fwb3PDJ_ahP24jx9jRgpUWwBD_37B8MXu1oql6WCs6J-vgU1YT"></script>
-<div class="map" id="myMap" style="height: 400px"></div>
 
 <div class="container-fluid">
+    <div class="map" id="myMap" style="height: 400px"></div>
     <div class="card">
         <div class="card-body">
             <div class="container mt-4">
@@ -50,6 +50,7 @@
                         {% endif %}
                     </div>
                 </div>
+                
                 {% endfor %}
 
                 <!-- Add Bootstrap JS and Popper.js scripts (required for Bootstrap components) -->
@@ -74,7 +75,6 @@
         var deliveryAgents = [
             {% for agent in delivery_agents %}
             {
-                print(agent)
                 latitude: {{ agent.latitude }},
                 longitude: {{ agent.longitude }},
                 
