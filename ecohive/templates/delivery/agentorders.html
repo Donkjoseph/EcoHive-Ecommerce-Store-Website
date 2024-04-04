@@ -1,0 +1,362 @@
+{% extends 'delivery/base.html' %}
+{% load static %}
+
+{% block content %}
+
+<div class="container">
+    <div class="card mt-5">
+        <div class="card-body">
+            <br>
+            <br>
+            <br>
+            <h5>Orders Assigned to You</h5>
+            {% if assigned_orders %}
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>User</th>
+                                <th>Seller</th>
+                                <th><a href="#" data-toggle="modal" data-target="#billingDetailsModal">Billing Details</a></th>
+                                <th><a href="#" data-toggle="modal" data-target="#orderProductDetailsModal">Order Product Details</a></th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for assigned_order in assigned_orders %}
+                                <tr>
+                                    <td>{{ assigned_order.user }}</td>
+                                    <td>{{ assigned_order.seller }}</td>
+                                    <td><a href="#" class="billing-details-link" data-toggle="modal" data-target="#billingDetailsModal" data-billing-details="{{ assigned_order.billingdetails_id }}">View Billing Details</a></td>
+                                    <td><a href="#" class="order-product-details-link" data-toggle="modal" data-target="#orderProductDetailsModal" data-order-id="{{ assigned_order.order_id }}">View Order Product Details</a></td>
+                                    <td>
+                                        {% if assigned_order.status == 'Confirmed' %}
+                                            Confirmed
+                                        {% else %}
+                                            Pending
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <button class="btn btn-primary scan-qr-code" data-order-id="{{ assigned_order.order_id }}">Scan QR Code</button>
+                                    </td>
+                                    <td>
+                                        {% if assigned_order.status == 'Pending' %}
+                                            <form method="post" action="{% url 'confirm_delivery' assigned_order.order_item.id %}">
+                                                {% csrf_token %}
+                                                <button type="submit" class="btn btn-primary">Confirm Delivery</button>
+                                            </form>
+                                        {% else %}
+                                            Confirmed
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                        
+                    </table>
+                </div>
+            {% else %}
+                <p>No orders assigned to you.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="qrCodeModal" tabindex="-1" aria-labelledby="qrCodeModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="qrCodeModalLabel">Scan QR Code</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center">
+                <video id="scanner" style="width: 90%;"></video>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="billingDetailsModal" tabindex="-1" role="dialog" aria-labelledby="billingDetailsModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="billingDetailsModalLabel">Billing Details</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body" id="billingDetailsModalBody">
+                <table class="table">
+                    <tbody>
+                        <tr>
+                            <th scope="row">First Name</th>
+                            <td id="billingFirstName"></td>
+                        </tr>
+                        <tr>
+                            <th scope="row">Last Name</th>
+                            <td id="billingLastName"></td>
+                        </tr>
+                        <tr>
+                            <th scope="row">State</th>
+                            <td id="billingState"></td>
+                        </tr>
+                        <tr>
+                            <th scope="row">Street Address</th>
+                            <td id="billingStreetAddress"></td>
+                        </tr>
+                        <tr>
+                            <th scope="row">Apartment/Suite/Unit</th>
+                            <td id="billingApartment"></td>
+                        </tr>
+                        <tr>
+                            <th scope="row">Town/City</th>
+                            <td id="billingCity"></td>
+                        </tr>
+                        <tr>
+                            <th scope="row">Postcode/ZIP</th>
+                            <td id="billingPostcode"></td>
+                        </tr>
+                        <tr>
+                            <th scope="row">Phone</th>
+                            <td id="billingPhone"></td>
+                        </tr>
+                        <tr>
+                            <th scope="row">Email</th>
+                            <td id="billingEmail"></td>
+                        </tr>
+
+                    </tbody>
+                </table>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Order Product Details Modal -->
+<div class="modal fade" id="orderProductDetailsModal" tabindex="-1" role="dialog" aria-labelledby="orderProductDetailsModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="orderProductDetailsModalLabel">Order Product Details</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body" id="orderProductDetailsModalBody">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Product</th>
+                            <th>Price</th>
+                            <th>Quantity</th>
+                            <th>Total Price</th>
+                            <th>Seller</th>
+                        </tr>
+                    </thead>
+                    <tbody id="orderProductDetailsTableBody">
+                        <!-- Order product details will be loaded here -->
+                    </tbody>
+                </table>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add these links to your base.html or HTML file -->
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+<!-- Add this link to include instascan library -->
+<script src="https://rawgit.com/schmich/instascan-builds/master/instascan.min.js"></script>
+
+<script>
+    $(document).ready(function() {
+        $('.billing-details-link').click(function() {
+            var billingDetailsId = $(this).data('billing-details');
+            $.ajax({
+                url: '/get-billing-details/' + billingDetailsId + '/',
+                success: function(data) {
+                    $('#billingFirstName').text(data.first_name);
+                    $('#billingLastName').text(data.last_name);
+                    $('#billingState').text(data.state);
+                    $('#billingStreetAddress').text(data.street_address);
+                    $('#billingApartment').text(data.apartment_suite_unit);
+                    $('#billingCity').text(data.town_city);
+                    $('#billingPostcode').text(data.postcode_zip);
+                    $('#billingPhone').text(data.phone);
+                    $('#billingEmail').text(data.email);
+                }
+            });
+        });
+    });
+</script>
+<script>
+    $(document).ready(function() {
+        $('.order-product-details-link').click(function() {
+            var orderId = $(this).data('order-id');
+            $.ajax({
+                url: '/get-order-product-details/' + orderId + '/',
+                success: function(data) {
+                    displayOrderProductDetails(data);
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error fetching order product details:', error);
+                }
+            });
+        });
+
+        function displayOrderProductDetails(data) {
+            var tableBody = $('#orderProductDetailsTableBody');
+            tableBody.empty(); // Clear previous content
+            
+            if (data.length === 0) {
+                tableBody.append('<tr><td colspan="5">No order product details found</td></tr>');
+                return;
+            }
+            
+            $.each(data, function(index, item) {
+                var row = $('<tr>');
+                row.append('<td>' + item.product + '</td>');
+                row.append('<td>' + item.price + '</td>');
+                row.append('<td>' + item.quantity + '</td>');
+                row.append('<td>' + item.total_price + '</td>');
+                row.append('<td>' + item.seller + '</td>');
+                tableBody.append(row);
+            });
+        }
+    });
+</script>
+<script>
+    $(document).ready(function() {
+        var scanner;
+
+        // Function to start QR code scanning
+        function startScan() {
+            scanner = new Instascan.Scanner({ video: document.getElementById('scanner') });
+            scanner.addListener('scan', function(content) {
+                // When QR code is scanned successfully, content contains the QR code data
+                var orderId = content; // Assuming QR code contains order ID
+                confirmOrder(orderId);
+            });
+            Instascan.Camera.getCameras().then(function(cameras) {
+                if (cameras.length > 0) {
+                    scanner.start(cameras[0]); // Start scanning using the first available camera
+                } else {
+                    console.error('No cameras found.');
+                }
+            }).catch(function(error) {
+                console.error('Error getting cameras:', error);
+            });
+        }
+
+        // Function to stop QR code scanning
+        function stopScan() {
+            if (scanner) {
+                scanner.stop();
+            }
+        }
+
+        // Function to confirm order
+        function confirmOrder(orderId) {
+            $.ajax({
+                url: '/confirm-order/' + orderId + '/',
+                method: 'POST',
+                success: function(response) {
+                    if (response.status === 'success') {
+                        alert(response.message); // You can replace this with your own UI feedback
+                        stopScan(); // Stop scanning after successful confirmation
+                    } else {
+                        alert(response.message); // You can replace this with your own UI feedback
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error(xhr.responseText);
+                }
+            });
+        }
+
+        // Event listener for Scan QR Code button click
+        $('.scan-qr-code').click(function() {
+            startScan();
+        });
+    });
+</script>
+{% comment %} <script>
+    $(document).ready(function() {
+        $('.scan-qr-code').click(function() {
+            var orderId = $(this).data('order-id');
+            openQRCodeModal(orderId);
+        });
+    });
+
+    function openQRCodeModal(orderId) {
+        $('#qrCodeModal').modal('show');
+        startQRCodeScanner(orderId);
+    }
+
+    function verifyOrder(qrCodeContent, orderId) {
+        $.ajax({
+            type: "POST",
+            url: "{% url 'verify_order' %}",
+            data: {
+                order_id: orderId,
+                qr_code_content: qrCodeContent
+            },
+            success: function(response) {
+                console.log(response);
+                if (response.success) {
+                    alert('Order confirmed successfully.');
+                } else {
+                    alert('Error: ' + response.error);
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error('Error verifying order:', error);
+                alert('Error verifying order');
+            }
+        });
+    }
+
+    function startQRCodeScanner(orderId) {
+        let scanner = new Instascan.Scanner({ video: document.getElementById('scanner') });
+        scanner.addListener('scan', function(content) {
+            verifyOrder(content, orderId);
+            closeQRCodeModal();
+        });
+        Instascan.Camera.getCameras().then(function(cameras) {
+            if (cameras.length > 0) {
+                scanner.start(cameras[0]);
+            } else {
+                console.error('No cameras found');
+                alert('No cameras found');
+            }
+        }).catch(function(error) {
+            console.error('Error accessing camera:', error);
+            alert('Error accessing camera');
+        });
+    }
+
+    function closeQRCodeModal() {
+        $('#qrCodeModal').modal('hide');
+        stopQRCodeScanner();
+    }
+
+    function stopQRCodeScanner() {
+        Instascan.Camera.getCameras().then(function(cameras) {
+            if (cameras.length > 0) {
+                cameras.forEach(function(camera) {
+                    camera.stop();
+                });
+            }
+        }).catch(function(error) {
+            console.error('Error stopping camera:', error);
+        });
+    }
+</script> {% endcomment %}
+{% endblock %}

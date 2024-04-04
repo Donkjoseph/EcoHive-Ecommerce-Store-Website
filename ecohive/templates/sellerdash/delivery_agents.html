@@ -1,0 +1,43 @@
+{% extends 'sellerdash/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container">
+    <div class="card mt-5">
+        <div class="card-body">
+            <h2 class="card-title">Delivery Agents List</h2>
+
+            {% if delivery_agents %}
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Availability</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for agent in delivery_agents %}
+                            <tr>
+                                <td>{{ agent.name }}</td>
+                                <td>
+                                    {% if agent.availability == 'not_available' %}
+                                        <span class="badge badge-warning">Not Available</span>
+                                    {% else %}
+                                        <span class="badge badge-success">Available</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p>No delivery agents found.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+{% endblock %}
